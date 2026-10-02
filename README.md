@@ -2,6 +2,8 @@
 
 ChiActive's own jacket collection: six AI-designed jackets with the real ChiActive patch printed on, in one ultra-minimal store.
 
+**Live site:** https://myraune.github.io/chiactive/ (code: https://github.com/myraune/chiactive)
+
 ## Preview It
 
 Double-click `../start-server-mac.command` (Mac) or `../start-server-windows.bat` (Windows), then open http://localhost:8000.
@@ -56,3 +58,11 @@ Double-click `../start-server-mac.command` (Mac) or `../start-server-windows.bat
 
 - Collection 01 is a design concept for a class project. The product details describe the designs, not tested garments.
 - The size guide uses typical measurements.
+
+## Publishing to GitHub Pages
+
+Run `python3 publish.py` from this folder (needs git and the GitHub CLI, signed in as myraune). It builds a clean copy that holds only the files the site uses, then pushes it to github.com/myraune/chiactive. The site updates in about a minute.
+- The public site shows "ChiActive Journal" instead of the student authors' names. This folder (the class ZIP) keeps the names.
+- `python3 publish.py --dry-run` shows what would be published without pushing.
+- `404.html` is GitHub Pages' "page not found" page, and `.nojekyll` makes GitHub serve the files as they are.
+
