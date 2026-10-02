@@ -517,3 +517,90 @@ html.seen .loader { display: none; }
 figure { margin: 0; }
 .ab-text .ab-lead { font: 400 clamp(22px, 2.3vw, 32px)/1.15 var(--font-head); color: var(--ink); }
 @media (max-width: 800px) { .jr-list a .jr-t::after { content: " →"; } }
+
+/* ---------- Product page v2: everything you need above the fold ----------
+   Gallery (thumbnails + one large photo) left, buy panel right, then Anatomy, campaign, related. */
+.pd.pd2 { grid-template-columns: minmax(0, 1fr) minmax(320px, 420px); gap: clamp(24px, 4vw, 72px); padding: 16px var(--gutter) 0; align-items: start; }
+.g { position: sticky; top: calc(var(--header-h) + 16px); display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; }
+.g-thumbs { display: grid; gap: 8px; align-content: start; }
+.g-thumbs button { padding: 0; border: 0; background: #fff; cursor: pointer; aspect-ratio: 4 / 5; overflow: hidden; opacity: .45; outline-offset: 2px; box-shadow: inset 0 -1px 0 transparent; transition: opacity var(--soft) var(--ease), box-shadow var(--soft) var(--ease); }
+.g-thumbs button:hover { opacity: .8; }
+.g-thumbs button[aria-current="true"] { opacity: 1; box-shadow: inset 0 -1px 0 var(--ink); }
+.g-thumbs img { width: 100%; height: 100%; object-fit: cover; }
+.g-stage { position: relative; height: calc(100svh - var(--header-h) - 40px); min-height: 460px; max-height: 920px; overflow: hidden; touch-action: pan-y; }
+.g-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transform: scale(1.015); transition: opacity .8s var(--ease), transform 1.2s var(--ease); }
+.g-stage img.g-photo { object-fit: cover; }
+.g-stage img.on { opacity: 1; transform: none; }
+.g-nav { position: absolute; right: 0; bottom: 0; display: flex; align-items: center; gap: 4px; padding: 10px 0; }
+.g-count { margin-right: 10px; font-size: 11px; letter-spacing: .12em; color: var(--muted); }
+.g-nav button { width: 34px; height: 34px; border: 0; background: rgba(255, 255, 255, .9); cursor: pointer; font-size: 14px; color: var(--ink); transition: opacity var(--soft) var(--ease); }
+.g-nav button:hover { opacity: .5; }
+
+.pi { position: sticky; top: calc(var(--header-h) + 16px); gap: 20px; padding: clamp(16px, 3vw, 40px) 0 32px; max-width: none; }
+.pi .pd-head h1 { font-size: clamp(1.4rem, 2vw, 1.8rem); }
+.pi form { gap: 14px; }
+.pi-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; }
+.pi-ship { margin: 0; font-size: 12px; color: var(--muted); text-align: center; }
+.pi-keys { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12.5px; }
+.pi-keys li { display: grid; grid-template-columns: 82px 1fr; gap: 12px; }
+.pi-keys span { color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; padding-top: 1px; }
+
+/* Anatomy: numbered hotspots on the cut-out; the list and the dots highlight each other. */
+.anat { padding: clamp(90px, 11vw, 170px) var(--gutter) 0; }
+.anat-head { display: grid; gap: 12px; justify-items: center; text-align: center; margin-bottom: clamp(32px, 5vw, 64px); }
+.anat-head h2 { font-size: clamp(26px, 3.4vw, 44px); }
+.anat-body { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 100px); align-items: center; max-width: 1180px; margin: 0 auto; }
+.anat-fig { position: relative; width: min(100%, calc(min(76svh, 720px) * (var(--ar)))); aspect-ratio: var(--ar); justify-self: center; }
+.anat-fig img { width: 100%; height: 100%; display: block; }
+.hs { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; padding: 0; border: 0; border-radius: 50%; background: #fff; color: var(--ink); font-size: 11px; cursor: pointer; box-shadow: 0 0 0 1px rgba(14, 15, 17, .9), 0 4px 14px rgba(14, 15, 17, .18); transition: background .4s var(--ease), color .4s var(--ease), transform .5s var(--ease); }
+.hs::before { content: ""; position: absolute; inset: -7px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .9); opacity: 0; transform: scale(.7); transition: opacity .5s var(--ease), transform .7s var(--ease); }
+.hs.on { background: var(--ink); color: #fff; transform: scale(1.12); }
+.hs.on::before { opacity: 1; transform: none; }
+.anat-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.anat-list li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--line); cursor: default; outline: none; opacity: .4; transition: opacity .5s var(--ease); }
+.anat-list li.on, .anat-list li:focus-visible { opacity: 1; }
+.anat-list .n { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid currentColor; border-radius: 50%; font-size: 10.5px; }
+.anat-list li.on .n { background: var(--ink); color: #fff; border-color: var(--ink); }
+.anat-list b { display: block; font-weight: 400; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+.anat-list p { margin: 4px 0 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.pd-wide { margin-top: clamp(90px, 11vw, 170px); }
+
+/* Buy bar: slides up once the main Add to cart button has scrolled away. */
+.buybar { position: fixed; left: 50%; bottom: 16px; z-index: 40; display: flex; align-items: center; gap: 14px; width: min(560px, calc(100% - 2 * var(--gutter))); padding: 8px 8px 8px 10px; background: rgba(255, 255, 255, .94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(14, 15, 17, .08); box-shadow: 0 10px 40px rgba(14, 15, 17, .1); transform: translate(-50%, 140%); transition: transform .7s var(--ease); }
+.buybar.show { transform: translate(-50%, 0); }
+.buybar img { width: 44px; height: 54px; object-fit: cover; }
+.buybar p { flex: 1; margin: 0; display: grid; font-size: 12px; }
+.buybar b { font-weight: 400; letter-spacing: .08em; text-transform: uppercase; font-size: 11.5px; }
+.buybar span { color: var(--muted); }
+.buybar .btn { padding: 14px 22px; white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .pd.pd2 { grid-template-columns: 1fr; padding: 0; gap: 0; }
+  .g { position: static; grid-template-columns: 1fr; }
+  .g-thumbs { display: none; }
+  .g-stage { height: auto; min-height: 0; aspect-ratio: 4 / 5; }
+  .g-nav { padding: 10px var(--gutter); }
+  .pi { position: static; padding: 24px var(--gutter) 0; }
+  .anat-body { grid-template-columns: 1fr; }
+  .anat-fig { width: min(100%, calc(62svh * (var(--ar)))); }
+  .hs { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+}
+@media (prefers-reduced-motion: reduce) { .buybar { transition: none; } }
+
+/* Checkout: the shop's slim bar, numbered steps, underline-only fields, no grey boxes. */
+.co .checkout { grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); gap: clamp(32px, 7vw, 120px); padding: clamp(24px, 4vw, 56px) var(--gutter) clamp(80px, 10vw, 140px); }
+.co .page-bar .count { justify-self: end; }
+.co .form { gap: 44px; max-width: 640px; }
+.co .form fieldset { gap: 22px 24px; }
+.co .form legend { display: flex; gap: 14px; margin-bottom: 18px; font: 400 11px/1.4 var(--font-body); letter-spacing: .14em; text-transform: uppercase; }
+.co .form legend span { color: var(--muted); }
+.co .field input { height: 40px; padding: 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; transition: border-color var(--soft) var(--ease); }
+.co .field input:focus { border-color: var(--ink); }
+.co .demo-note { margin: -28px 0 0; padding: 0; background: none; color: var(--muted); font-size: 11.5px; text-align: center; }
+.co .summary { padding: 0; background: none; gap: 16px; }
+.co .summary h2 { padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.co .done { justify-items: center; text-align: center; margin: 0 auto; padding: clamp(80px, 12vw, 160px) var(--gutter); }
+@media (max-width: 800px) { .co .checkout { grid-template-columns: 1fr; } }
+.co .summary { top: calc(var(--header-h) + 76px); }
+.co .ship-note { margin: 0; font-size: 12px; color: var(--muted); }
+.co .ship-note:empty { display: none; }

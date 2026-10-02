@@ -145,21 +145,72 @@
   if (form) {
     const p = byId[form.dataset.add];
     let size = null;
-    const sizeError = $('[data-size-error]');
+    const sizeError = $('[data-size-error]'), submit = $('button[type="submit"]', form);
+    const bar = $('[data-buybar]'), barBtn = bar && $('[data-buybar-add]', bar);
+    const syncBar = () => { if (barBtn) barBtn.textContent = size ? `Add to cart · ${size}` : 'Select size'; };
     $$('[data-size]').forEach(b => b.addEventListener('click', () => {
       size = b.dataset.size;
       $$('[data-size]').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
       sizeError.hidden = true;
+      syncBar();
     }));
     form.addEventListener('submit', e => {
       e.preventDefault();
       if (!size) { sizeError.hidden = false; $('[data-size]').focus(); return; }
       addToCart(p.id, size, 1);
-      const btn = $('button[type="submit"]', form);
-      btn.textContent = 'Added';
-      setTimeout(() => { btn.textContent = 'Add to cart'; }, 1400);
+      submit.textContent = 'Added';
+      setTimeout(() => { submit.textContent = 'Add to cart'; }, 1400);
       openCart();
     });
+    $$('[data-open-guide]').forEach(b => b.addEventListener('click', () => {
+      const d = $('#size-guide');
+      d.open = true;
+      d.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }));
+    /* Buy bar: shown while the main Add to cart button is scrolled out of view above. */
+    if (bar && 'IntersectionObserver' in window) {
+      const toggle = show => { bar.classList.toggle('show', show); bar.inert = !show; };
+      toggle(false);
+      new IntersectionObserver(([en]) => toggle(!en.isIntersecting && en.boundingClientRect.top < 0)).observe(submit);
+      barBtn.addEventListener('click', () => {
+        if (size) { form.requestSubmit(); return; }
+        sizeError.hidden = false;
+        $('.sizes', form).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  }
+
+  /* Gallery: thumbnails, arrows, arrow keys and swipe crossfade between the photos. */
+  const gallery = $('[data-gallery]');
+  if (gallery) {
+    const slides = $$('.g-stage img', gallery), thumbs = $$('[data-thumb]', gallery), count = $('[data-g-count]', gallery);
+    const stage = $('.g-stage', gallery);
+    let g = 0;
+    const go = n => {
+      g = (n + slides.length) % slides.length;
+      slides.forEach((s, k) => s.classList.toggle('on', k === g));
+      thumbs.forEach((t, k) => t.setAttribute('aria-current', String(k === g)));
+      count.textContent = `${g + 1} / ${slides.length}`;
+    };
+    thumbs.forEach((t, k) => t.addEventListener('click', () => go(k)));
+    $$('[data-g-step]', gallery).forEach(b => b.addEventListener('click', () => go(g + Number(b.dataset.gStep))));
+    gallery.addEventListener('keydown', e => { if (e.key === 'ArrowRight') go(g + 1); if (e.key === 'ArrowLeft') go(g - 1); });
+    let x0 = null;
+    stage.addEventListener('pointerdown', e => { x0 = e.clientX; });
+    stage.addEventListener('pointerup', e => { if (x0 !== null && Math.abs(e.clientX - x0) > 40) go(g + (e.clientX < x0 ? 1 : -1)); x0 = null; });
+  }
+
+  /* Anatomy: the numbered dots on the jacket and the feature list highlight each other. */
+  const anatomy = $('[data-anatomy]');
+  if (anatomy) {
+    const dots = $$('[data-hs]', anatomy), feats = $$('[data-feat]', anatomy);
+    const on = n => {
+      dots.forEach((d, k) => d.classList.toggle('on', k === n));
+      feats.forEach((f, k) => f.classList.toggle('on', k === n));
+    };
+    dots.forEach((d, k) => ['mouseenter', 'focus', 'click'].forEach(t => d.addEventListener(t, () => on(k))));
+    feats.forEach((f, k) => ['mouseenter', 'focus', 'click'].forEach(t => f.addEventListener(t, () => on(k))));
+    on(0);
   }
 
   /* ---------- Quick add on product cards ---------- */
@@ -197,6 +248,8 @@
     $('[data-sum-subtotal]').textContent = money(subtotal());
     $('[data-sum-shipping]').textContent = ship ? money(ship) : 'Free';
     $('[data-sum-total]').textContent = money(subtotal() + ship);
+    const note = $('[data-sum-note]');
+    if (note) note.textContent = shippingNote(subtotal(), itemCount());
     const submit = $('[data-checkout-form] button[type="submit"]');
     if (submit) submit.disabled = !cart.length;
   }

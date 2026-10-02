@@ -29,7 +29,7 @@ Double-click `../start-server-mac.command` (Mac) or `../start-server-windows.bat
 - **Loading screen:** only the logo, with a thin beam of light sweeping across it. It shows once per browser session.
 - **Hero:** only the giant CHIACTIVE wordmark and a jacket on pure white, slowly crossfading to the next jacket every few seconds.
 - **Parallax:** the jacket drifts and tilts slightly toward the mouse while the wordmark moves the other way, for depth. It floats gently over a soft shadow.
-- **Light hover:** a soft studio light follows the mouse across the jacket. The light layer uses the jacket's own cut-out as a mask, so it only lands on the fabric, never on the white page.
+- **View label:** over the jacket, a round black "View" label follows the mouse, and clicking the jacket opens its product page. Every movement is a GPU transform in a single animation loop, so it stays smooth.
 - **Reduce motion:** with this setting on, the jacket stays still. Add `?motion=1` to the address to force mouse movement on.
 
 ## Design
@@ -39,7 +39,11 @@ Double-click `../start-server-mac.command` (Mac) or `../start-server-windows.bat
 - **Shop:** one slim sticky bar with the filters, then only photo, name and price.
 - **Product card hover:** the jacket slowly fades into a close-up of the chest patch, and a quiet row of sizes rises from the bottom. Click a size to add the jacket straight to the cart (quick add). On touch screens the cards show only the photo.
 - **About and Journal:** the same slim sticky bar as the shop, then straight to the content. About pairs one photo with a quiet text column and links to all six jackets. The Journal shows one line per story: date, title and author.
-- **Product pages:** photos stacked on the left; one quiet sticky panel on the right with size, add to cart, and Description / Details / Size guide.
+- **Product pages:** everything you need is above the fold: a gallery (thumbnails, arrows, swipe) on the left and the buy panel on the right (type, name, price, color, size with a size guide, Add to cart, free-shipping note and three key specs). Below:
+  - **Anatomy:** numbered markers on the jacket, and hovering a marker or a feature in the list highlights both.
+  - The campaign photo and related jackets.
+  - A slim buy bar slides up at the bottom once you scroll past Add to cart.
+- **Checkout:** the same slim bar, numbered steps, fields with only a line under them, and an order summary with a free-shipping nudge.
 - **Earlier explorations:** three alternative homepage concepts (Editorial, Monochrome, Neon) are kept in `_archive/concepts/` for reference.
 
 ## Page Map
@@ -47,7 +51,7 @@ Double-click `../start-server-mac.command` (Mac) or `../start-server-windows.bat
 | File | What it is |
 |---|---|
 | `shop.html` | All six jackets, filterable: `#shells`, `#insulated`, `#layers` |
-| `jackets/*.html` | Minimal product pages: photos stacked on the left; name, price, size, add to cart and Description / Details / Size guide on the right |
+| `jackets/*.html` | Product pages: gallery and buy panel, Anatomy hotspots, campaign photo, related jackets, buy bar |
 | `blog/` | Journal: the student posts and the backpack article |
 | `about.html` | Brand story and how the collection was made |
 | `checkout.html` | Demo checkout. Nothing is sent and no payment is taken. |

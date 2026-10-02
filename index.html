@@ -13,7 +13,7 @@
 <meta property="og:description" content="ChiActive Collection 01: six jackets for the four-season city.">
 <meta property="og:image" content="https://myraune.github.io/chiactive/images/ai/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="styles.css?v=c21">
+<link rel="stylesheet" href="styles.css?v=c25">
 <link rel="preload" as="image" href="images/ai/cutouts/lakeshore-shell.webp">
 <script>/* Skip the loading screen after the first visit in this browser session. */
 try { if (sessionStorage.getItem('chiactive-loaded')) document.documentElement.classList.add('seen'); } catch (e) {}</script><style>
@@ -25,16 +25,17 @@ try { if (sessionStorage.getItem('chiactive-loaded')) document.documentElement.c
 .cx-edit .e-tools { justify-self: end; }
 .cx-edit .e-logo { font: 700 30px/1 var(--font-head); letter-spacing: .02em; text-decoration: none; }
 .e-hero { position: relative; height: min(86svh, 860px); min-height: 560px; overflow: hidden; transition: background .9s var(--ease); }
-.e-word { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%) translate3d(var(--wx, 0px), var(--wy, 0px), 0); margin: 0; font: 700 21vw/.8 var(--font-head); letter-spacing: -.035em; color: #0E0F11; white-space: nowrap; pointer-events: none; }
-.e-hero { perspective: 1600px; }
-.e-stage { position: absolute; left: 50%; bottom: 4%; width: min(40vw, 520px); height: 86%; transform: translateX(-50%) translate3d(var(--px, 0px), var(--py, 0px), 0) rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg)); transform-style: preserve-3d; will-change: transform; }
+.e-word { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%); margin: 0; font: 700 21vw/.8 var(--font-head); letter-spacing: -.035em; color: #0E0F11; white-space: nowrap; pointer-events: none; will-change: transform; }
+.e-stage { position: absolute; left: 50%; bottom: 4%; width: min(40vw, 520px); height: 86%; transform: translateX(-50%); will-change: transform; display: block; z-index: 1; }
 .e-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; opacity: 0; transform: translateY(10px) scale(.99); transition: opacity 1.6s var(--ease), transform 2s var(--ease); }
-.e-stage::after { content: ""; position: absolute; left: 18%; right: 18%; bottom: -1.5%; height: 5%; background: radial-gradient(closest-side, rgba(14,15,17,.16), transparent); filter: blur(4px); animation: e-shadow 7s ease-in-out infinite; }
-.e-float { position: absolute; inset: 0; animation: e-float 7s ease-in-out infinite; transition: scale 1.4s var(--ease); }
-.e-hero.lit .e-float { scale: 1.015; }
-/* Light hover: a soft studio light that follows the pointer, masked by the jacket's own cut-out. */
-.e-light { position: absolute; inset: 0; pointer-events: none; -webkit-mask: var(--m) 50% 100% / contain no-repeat; mask: var(--m) 50% 100% / contain no-repeat; background: radial-gradient(circle 260px at var(--lx, 50%) var(--ly, 40%), rgba(255,255,255,.95), rgba(255,255,255,.4) 38%, transparent 72%); mix-blend-mode: soft-light; opacity: 0; transition: opacity 1.2s var(--ease); }
-.e-hero.lit .e-light { opacity: 1; }
+.e-stage::after { content: ""; position: absolute; left: 18%; right: 18%; bottom: -1.5%; height: 5%; background: radial-gradient(closest-side, rgba(14,15,17,.14), rgba(14,15,17,.05) 60%, transparent); animation: e-shadow 7s ease-in-out infinite; }
+.e-float { position: absolute; inset: 0; animation: e-float 7s ease-in-out infinite; }
+/* "View" label: a round black label follows the pointer over the jacket; the jacket links to its page. */
+.e-view { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; will-change: transform; }
+.e-view span { display: grid; place-items: center; width: 86px; height: 86px; margin: -43px 0 0 -43px; border-radius: 50%; background: #0E0F11; color: #fff; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; opacity: 0; transform: scale(.4); transition: opacity .35s var(--ease), transform .55s var(--ease); }
+.e-hero.over .e-view span { opacity: 1; transform: none; }
+.e-hero.over a.e-stage { cursor: none; }
+@media (hover: none) { .e-view { display: none; } }
 @keyframes e-float { 50% { translate: 0 -8px; } }
 @keyframes e-shadow { 50% { transform: scaleX(.9); opacity: .75; } }
 @media (prefers-reduced-motion: reduce) { .e-float, .e-stage::after { animation: none; } }
@@ -119,7 +120,8 @@ try { if (sessionStorage.getItem('chiactive-loaded')) document.documentElement.c
   <div class="ed-top"><section class="e-hero" data-tints='[&quot;#41B6E6&quot;, &quot;#2B3A50&quot;, &quot;#C8102E&quot;, &quot;#EFE3C2&quot;, &quot;#26364D&quot;, &quot;#1C2028&quot;]' data-items='[{&quot;name&quot;: &quot;Lakeshore Shell&quot;, &quot;price&quot;: &quot;$289&quot;, &quot;url&quot;: &quot;jackets/lakeshore-shell.html&quot;}, {&quot;name&quot;: &quot;312 Down Parka&quot;, &quot;price&quot;: &quot;$349&quot;, &quot;url&quot;: &quot;jackets/312-down-parka.html&quot;}, {&quot;name&quot;: &quot;Loop Puffer&quot;, &quot;price&quot;: &quot;$229&quot;, &quot;url&quot;: &quot;jackets/loop-puffer.html&quot;}, {&quot;name&quot;: &quot;Wacker Anorak&quot;, &quot;price&quot;: &quot;$149&quot;, &quot;url&quot;: &quot;jackets/wacker-anorak.html&quot;}, {&quot;name&quot;: &quot;North Branch Fleece&quot;, &quot;price&quot;: &quot;$139&quot;, &quot;url&quot;: &quot;jackets/north-branch-fleece.html&quot;}, {&quot;name&quot;: &quot;Night Line Shell&quot;, &quot;price&quot;: &quot;$199&quot;, &quot;url&quot;: &quot;jackets/night-line-shell.html&quot;}]' aria-label="Collection 01 jackets">
     <p class="e-kicker">Built<br>for the<br>four-season<br>city.</p>
     <p class="e-word" aria-hidden="true">CHIACTIVE</p>
-    <div class="e-stage"><div class="e-float"><img src="images/ai/cutouts/lakeshore-shell.webp" alt="Lakeshore Shell" data-i="0" class="on"><img src="images/ai/cutouts/312-down-parka.webp" alt="312 Down Parka" data-i="1"><img src="images/ai/cutouts/loop-puffer.webp" alt="Loop Puffer" data-i="2"><img src="images/ai/cutouts/wacker-anorak.webp" alt="Wacker Anorak" data-i="3"><img src="images/ai/cutouts/north-branch-fleece.webp" alt="North Branch Fleece" data-i="4"><img src="images/ai/cutouts/night-line-shell.webp" alt="Night Line Shell" data-i="5"><div class="e-light" aria-hidden="true"></div></div></div>
+    <a class="e-stage" href="jackets/lakeshore-shell.html" aria-label="View Lakeshore Shell"><div class="e-float"><img src="images/ai/cutouts/lakeshore-shell.webp" alt="Lakeshore Shell" data-i="0" class="on"><img src="images/ai/cutouts/312-down-parka.webp" alt="312 Down Parka" data-i="1"><img src="images/ai/cutouts/loop-puffer.webp" alt="Loop Puffer" data-i="2"><img src="images/ai/cutouts/wacker-anorak.webp" alt="Wacker Anorak" data-i="3"><img src="images/ai/cutouts/north-branch-fleece.webp" alt="North Branch Fleece" data-i="4"><img src="images/ai/cutouts/night-line-shell.webp" alt="Night Line Shell" data-i="5"></div></a>
+    <div class="e-view" aria-hidden="true"><span>View</span></div>
     <div class="e-pager" role="group" aria-label="Choose a jacket"><button type="button" data-go="0" aria-pressed="true"><span>01</span>Lakeshore Shell</button><button type="button" data-go="1" aria-pressed="false"><span>02</span>312 Down Parka</button><button type="button" data-go="2" aria-pressed="false"><span>03</span>Loop Puffer</button><button type="button" data-go="3" aria-pressed="false"><span>04</span>Wacker Anorak</button><button type="button" data-go="4" aria-pressed="false"><span>05</span>North Branch Fleece</button><button type="button" data-go="5" aria-pressed="false"><span>06</span>Night Line Shell</button></div>
     <p class="e-side">New<br>collection<br>FW26</p>
     <div class="e-actions"><a class="e-btn" href="shop.html">Shop now</a><a class="link" href="jackets/lakeshore-shell.html" data-now-link>Explore</a></div>
@@ -185,8 +187,8 @@ try { if (sessionStorage.getItem('chiactive-loaded')) document.documentElement.c
   <div><h2>Shop</h2><ul><li><a href="shop.html#shells">Shells</a></li><li><a href="shop.html#insulated">Insulated</a></li><li><a href="shop.html#layers">Layers</a></li><li><a href="shop.html">All jackets</a></li></ul></div>
   <div><h2>ChiActive</h2><ul><li><a href="about.html">About</a></li><li><a href="blog/index.html">Journal</a></li><li><a href="checkout.html">Checkout</a></li></ul></div>
 </footer>
-<script src="js/products.js?v=c21"></script>
-<script src="js/main.js?v=c21"></script>
+<script src="js/products.js?v=c25"></script>
+<script src="js/main.js?v=c25"></script>
 <script>
 /* Editorial hero: cycle through the six jackets with a slow crossfade on a pure white stage. */
 (() => {
@@ -194,13 +196,13 @@ try { if (sessionStorage.getItem('chiactive-loaded')) document.documentElement.c
   const imgs = [...hero.querySelectorAll('.e-stage img')], btns = [...hero.querySelectorAll('[data-go]')];
   const tints = JSON.parse(hero.dataset.tints), items = JSON.parse(hero.dataset.items);
   const now = hero.querySelector('[data-now]'), nowLink = hero.querySelector('[data-now-link]');
-  const light = hero.querySelector('.e-light');
+  const stage = hero.querySelector('.e-stage'), word = hero.querySelector('.e-word'), view = hero.querySelector('.e-view');
   let i = 0, timer = null;
   function show(n) {
     i = (n + imgs.length) % imgs.length;
     imgs.forEach((im, k) => im.classList.toggle('on', k === i));
     btns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
-    light.style.setProperty('--m', `url("${imgs[i].src}")`);
+    stage.href = items[i].url; stage.setAttribute('aria-label', 'View ' + items[i].name);
     now.textContent = `${items[i].name} · ${items[i].price}`; now.href = items[i].url; nowLink.href = items[i].url;
   }
   btns.forEach((b, k) => b.addEventListener('click', () => { show(k); stop(); }));
@@ -209,43 +211,34 @@ try { if (sessionStorage.getItem('chiactive-loaded')) document.documentElement.c
   hero.addEventListener('mouseenter', stop); hero.addEventListener('mouseleave', () => { if (!timer) play(); });
   show(0); play();
 
-  /* Light: a soft studio light glides after the pointer across the jacket (lerp 12% per frame).
-     The layer uses the jacket's cut-out as its mask, so the light only lands on the fabric. */
-  if (matchMedia('(hover: hover)').matches) {
-    let lx = 50, ly = 40, gx = 50, gy = 40, lraf = 0;
-    const glide = () => {
-      gx += (lx - gx) * 0.12; gy += (ly - gy) * 0.12;
-      light.style.setProperty('--lx', gx.toFixed(2) + '%'); light.style.setProperty('--ly', gy.toFixed(2) + '%');
-      lraf = Math.abs(lx - gx) + Math.abs(ly - gy) > 0.05 ? requestAnimationFrame(glide) : 0;
-    };
-    hero.addEventListener('pointermove', e => {
-      const r = light.getBoundingClientRect();
-      lx = (e.clientX - r.left) / r.width * 100; ly = (e.clientY - r.top) / r.height * 100;
-      if (!hero.classList.contains('lit')) { gx = lx; gy = ly; hero.classList.add('lit'); }
-      if (!lraf) lraf = requestAnimationFrame(glide);
-    });
-    hero.addEventListener('pointerleave', () => hero.classList.remove('lit'));
-  }
-
-  /* Parallax: the jacket drifts toward the pointer and tilts a little in 3D; the wordmark
-     drifts the other way for depth. Lerp (5% per frame) keeps the motion slow and soft. */
+  /* Pointer: one rAF loop, transforms only (no layout reads per frame, no repaints), so it stays smooth.
+     The jacket drifts a few pixels toward the pointer and the wordmark the other way (lerp 7% per frame);
+     over the jacket a round "View" label follows the pointer a little faster (lerp 20%). */
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches && !/[?&]motion=1/.test(location.search);
-  if (!still && matchMedia('(hover: hover)').matches) {
-    let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+  if (matchMedia('(hover: hover)').matches) {
+    const t = { x: 0, y: 0 }, c = { x: 0, y: 0 }, vt = { x: 0, y: 0 }, v = { x: 0, y: 0 };
+    let raf = 0;
     const tick = () => {
-      cx += (tx - cx) * 0.05; cy += (ty - cy) * 0.05;
-      const st = hero.style;
-      st.setProperty('--px', (cx * 14).toFixed(2) + 'px'); st.setProperty('--py', (cy * 8).toFixed(2) + 'px');
-      st.setProperty('--ry', (cx * 5).toFixed(2) + 'deg'); st.setProperty('--rx', (-cy * 2.5).toFixed(2) + 'deg');
-      st.setProperty('--wx', (-cx * 16).toFixed(2) + 'px'); st.setProperty('--wy', (-cy * 6).toFixed(2) + 'px');
-      raf = Math.abs(tx - cx) + Math.abs(ty - cy) > 0.0005 ? requestAnimationFrame(tick) : 0;
+      c.x += (t.x - c.x) * 0.07; c.y += (t.y - c.y) * 0.07;
+      v.x += (vt.x - v.x) * 0.2; v.y += (vt.y - v.y) * 0.2;
+      if (!still) {
+        stage.style.transform = `translateX(-50%) translate3d(${(c.x * 18).toFixed(2)}px, ${(c.y * 10).toFixed(2)}px, 0)`;
+        word.style.transform = `translate(-50%, -54%) translate3d(${(-c.x * 14).toFixed(2)}px, ${(-c.y * 6).toFixed(2)}px, 0)`;
+      }
+      view.style.transform = `translate3d(${v.x.toFixed(1)}px, ${v.y.toFixed(1)}px, 0)`;
+      const busy = Math.abs(t.x - c.x) + Math.abs(t.y - c.y) > 0.0004 || Math.abs(vt.x - v.x) + Math.abs(vt.y - v.y) > 0.2;
+      raf = busy ? requestAnimationFrame(tick) : 0;
     };
-    const wake = () => { if (!raf) raf = requestAnimationFrame(tick); };
     hero.addEventListener('pointermove', e => {
       const r = hero.getBoundingClientRect();
-      tx = (e.clientX - r.left) / r.width - 0.5; ty = (e.clientY - r.top) / r.height - 0.5; wake();
+      t.x = (e.clientX - r.left) / r.width - 0.5; t.y = (e.clientY - r.top) / r.height - 0.5;
+      vt.x = e.clientX - r.left; vt.y = e.clientY - r.top;
+      const over = !!e.target.closest('.e-stage');
+      if (over && !hero.classList.contains('over')) { v.x = vt.x; v.y = vt.y; }  // label appears under the pointer, not flying in
+      hero.classList.toggle('over', over);
+      if (!raf) raf = requestAnimationFrame(tick);
     });
-    hero.addEventListener('pointerleave', () => { tx = 0; ty = 0; wake(); });
+    hero.addEventListener('pointerleave', () => { t.x = 0; t.y = 0; hero.classList.remove('over'); if (!raf) raf = requestAnimationFrame(tick); });
   }
 })();
 </script>

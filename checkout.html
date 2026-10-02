@@ -13,7 +13,7 @@
 <meta property="og:description" content="Demo checkout.">
 <meta property="og:image" content="https://myraune.github.io/chiactive/images/ai/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="styles.css?v=c21">
+<link rel="stylesheet" href="styles.css?v=c25">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -26,13 +26,12 @@
 </div>
 <div class="menu" id="menu" hidden><nav aria-label="Menu"><a href="shop.html">Shop</a><a href="shop.html#shells">Shells</a><a href="shop.html#insulated">Insulated</a><a href="shop.html#layers">Layers</a><a href="blog/index.html">Journal</a><a href="about.html">About</a></nav><div class="menu-sub"><a class="link" href="checkout.html">Checkout</a></div></div>
 
-<main id="main">
-  <div class="page-head"><nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><span aria-current="page">Checkout</span></nav><h1>Checkout</h1></div>
+<main id="main" class="co">
+  <div class="page-bar"><h1>Checkout</h1><span></span><a class="count" href="shop.html">Continue shopping</a></div>
   <div class="checkout" data-checkout>
     <form class="form" data-checkout-form>
-      <p class="demo-note">Demo checkout for a class project. Nothing you enter leaves this page, and no payment is taken.</p>
-      <fieldset><legend>Contact</legend><div class="field full"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required></div></fieldset>
-      <fieldset><legend>Shipping</legend>
+      <fieldset><legend><span>01</span>Contact</legend><div class="field full"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required></div></fieldset>
+      <fieldset><legend><span>02</span>Shipping</legend>
         <div class="field"><label for="first">First name</label><input id="first" name="first" autocomplete="given-name" required></div>
         <div class="field"><label for="last">Last name</label><input id="last" name="last" autocomplete="family-name" required></div>
         <div class="field full"><label for="address">Address</label><input id="address" name="address" autocomplete="street-address" required></div>
@@ -40,9 +39,10 @@
         <div class="field"><label for="zip">ZIP code</label><input id="zip" name="zip" autocomplete="postal-code" inputmode="numeric" required></div>
       </fieldset>
       <button class="btn btn-block" type="submit">Place demo order</button>
+      <p class="demo-note">Demo checkout for a class project. Nothing you enter leaves this page, and no payment is taken.</p>
     </form>
     <aside class="summary" aria-labelledby="sum"><h2 id="sum" class="small">Your order</h2><div class="sum-lines" data-sum-lines></div>
-      <div class="totals"><div><span>Subtotal</span><span data-sum-subtotal>$0.00</span></div><div><span>Shipping</span><span data-sum-shipping>Free</span></div><div class="grand"><span>Total</span><span data-sum-total>$0.00</span></div></div></aside>
+      <div class="totals"><div><span>Subtotal</span><span data-sum-subtotal>$0.00</span></div><div><span>Shipping</span><span data-sum-shipping>Free</span></div><div class="grand"><span>Total</span><span data-sum-total>$0.00</span></div></div><p class="ship-note" data-sum-note></p></aside>
   </div>
   <div class="done" data-done hidden><p class="small muted">Order <span data-order-no></span></p><h2>Thanks, you're all set.</h2><p class="muted">This was a demo order, so nothing will ship. Your cart has been cleared.</p><a class="btn" href="shop.html">Keep shopping</a></div>
 </main>
@@ -51,7 +51,7 @@
   <div><h2>Shop</h2><ul><li><a href="shop.html#shells">Shells</a></li><li><a href="shop.html#insulated">Insulated</a></li><li><a href="shop.html#layers">Layers</a></li><li><a href="shop.html">All jackets</a></li></ul></div>
   <div><h2>ChiActive</h2><ul><li><a href="about.html">About</a></li><li><a href="blog/index.html">Journal</a></li><li><a href="checkout.html">Checkout</a></li></ul></div>
 </footer>
-<script src="js/products.js?v=c21"></script>
-<script src="js/main.js?v=c21"></script>
+<script src="js/products.js?v=c25"></script>
+<script src="js/main.js?v=c25"></script>
 </body>
 </html>
