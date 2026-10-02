@@ -2,7 +2,7 @@
 <html lang="en" data-root="">
 <head>
 <meta charset="UTF-8">
-<script>(function () { var p = location.pathname.split('/'); var root = location.hostname.slice(-10) === 'github.io' && p.length > 2 ? '/' + p[1] + '/' : '/'; document.write('<base href="' + root + '">'); })();</script>
+<script>(function () { var p = location.pathname.split('/'); var b = document.createElement('base'); b.href = /\.github\.io$/.test(location.hostname) && p.length > 2 ? '/' + p[1] + '/' : '/'; document.head.appendChild(b); })();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Page not found | ChiActive</title>
 <meta name="description" content="This page went out with the wind.">
