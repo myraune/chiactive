@@ -820,3 +820,10 @@ html { scroll-behavior: auto; }
 .ss-chip { position: static; margin-top: 14px; text-shadow: none; }
 .ss-line { font-size: clamp(15px, 1.35vw, 20px); }
 @media (max-width: 800px) { .ss-chip { margin-top: 8px; } }
+
+/* Unzip intro v2 (WebGL): the jacket is drawn on a full-screen canvas; the pull rides on top. */
+.zip-jacket { top: 0; right: 0; bottom: 0; left: 0; width: auto; height: auto; aspect-ratio: auto; transform: none; }
+.zip-gl { position: absolute; inset: 0; width: 100%; height: 100%; }
+.zip-src { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.zip-pull { left: 0; top: 0; margin: -8px 0 0 -14px; }
+.zip-still .zip-src { display: none; }

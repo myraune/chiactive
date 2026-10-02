@@ -32,10 +32,10 @@ The homepage is told in scenes, and scrolling plays them. All the animation code
 - `js/home.js` runs the other scenes.
 
 0. **Loading screen and entrance:** only the logo, with a light beam sweeping across it (once per session). Then the CHIACTIVE letters rise one by one and the jacket stands up.
-1. **Unzip:** scroll, or drag the zip pull with the Chicago star, to unzip the Lakeshore Shell.
-   - The halves open into a V with zipper teeth along the edges, and you see the quilted lining and the woven neck label inside.
-   - The halves then swing out like doors, and the lining fills the screen, so you are inside the jacket.
-   - Collection 01 rises out of it: "Six jackets. One city."
+1. **Unzip** (WebGL): scroll, or drag the zip pull with the Chicago star, to unzip a large Lakeshore Shell like a real zip.
+   - The jacket is a mesh of about 15,000 points, and only the fabric near the zip moves. Above the pull the edges part in a soft curve: closed at the pull, widest at the collar. The sleeves and shoulders stay still, and the fabric in between bunches and darkens like a fold.
+   - Each opened edge shows its facing and its zipper teeth, and through the opening you see the quilted lining with the woven neck label.
+   - The camera follows the pull down the jacket, then flies into the opening until the lining fills the screen, and Collection 01 rises out of it: "Six jackets. One city."
 2. **Manifesto:** a big sentence whose words light up one by one as it passes the middle of the screen, then an outlined "FOUR KINDS OF COLD" marquee that speeds up, reverses and skews with your scrolling.
 3. **Four kinds of cold:** a pinned stage that scrolls sideways through four full-screen panels:
    - January on the L platform: 312 Down Parka.
