@@ -38,6 +38,7 @@ Double-click `../start-server-mac.command` (Mac) or `../start-server-windows.bat
 - **Header:** the ChiActive patch centered on white, like Canada Goose's badge. It's the same on every page.
 - **Shop:** one slim sticky bar with the filters, then only photo, name and price.
 - **Product card hover:** the jacket slowly fades into a close-up of the chest patch, and a quiet row of sizes rises from the bottom. Click a size to add the jacket straight to the cart (quick add). On touch screens the cards show only the photo.
+- **About and Journal:** the same slim sticky bar as the shop, then straight to the content. About pairs one photo with a quiet text column and links to all six jackets. The Journal shows one line per story: date, title and author.
 - **Product pages:** photos stacked on the left; one quiet sticky panel on the right with size, add to cart, and Description / Details / Size guide.
 - **Earlier explorations:** three alternative homepage concepts (Editorial, Monochrome, Neon) are kept in `_archive/concepts/` for reference.
 

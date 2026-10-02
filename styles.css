@@ -456,3 +456,64 @@ html.seen .loader { display: none; }
   .card:hover .quick, .card:focus-within .quick { opacity: 1; transform: none; }
 }
 @media (hover: none) { .quick, .card-alt { display: none; } }
+
+/* ---------- Quiet pages: About, Journal, article ----------
+   Same slim sticky bar as the shop, then straight to the content. No breadcrumbs, no big titles. */
+.page-bar { position: sticky; top: var(--header-h); z-index: 30; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 18px var(--gutter); background: rgba(255, 255, 255, .94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.page-bar h1, .page-bar a, .page-bar p { margin: 0; font: 400 11px/1.4 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--ink); text-decoration: none; }
+.page-bar .count { justify-self: end; color: var(--muted); }
+.page-bar a { justify-self: start; transition: opacity var(--soft) var(--ease); }
+.page-bar a:hover { opacity: .5; }
+
+/* About: photo left, one quiet column right that stays in view while the photo scrolls. */
+.ab { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(32px, 7vw, 120px); align-items: start; padding-right: var(--gutter); }
+.ab-media img { display: block; width: 100%; aspect-ratio: 1136 / 1408; object-fit: cover; }
+.ab-text { position: sticky; top: calc(var(--header-h) + 90px); display: grid; gap: 26px; max-width: 420px; padding: clamp(24px, 5vw, 72px) 0; }
+.ab-lead { margin: 0; font: 400 clamp(22px, 2.3vw, 32px)/1.15 var(--font-head); letter-spacing: -.005em; }
+.ab-text p { margin: 0; font-size: 13px; line-height: 1.75; color: var(--muted); }
+.ab-text .ab-lead { color: var(--ink); }
+.ab-text .ab-label { margin-bottom: 10px; color: var(--ink); font-size: 11px; line-height: 1.4; }
+.ab-text .link { justify-self: start; }
+.ab-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.ab-list a { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.ab-list b { font-weight: 400; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size var(--soft) var(--ease); padding-bottom: 2px; }
+.ab-list a:hover b { background-size: 100% 1px; }
+.ab-list span { color: var(--muted); font-size: 12px; }
+.ab-wide { margin-top: clamp(80px, 10vw, 160px); }
+
+/* Journal: one line per story, like the shop shows one line per jacket. */
+.jr { padding: clamp(24px, 4vw, 48px) var(--gutter) clamp(80px, 10vw, 150px); }
+.jr-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.jr-list li > * { display: grid; grid-template-columns: 170px minmax(0, 1fr) 200px 48px; gap: 24px; align-items: baseline; padding: 20px 0; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+.jr-date, .jr-by, .jr-go { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.jr-go { justify-self: end; color: var(--ink); }
+.jr-t { justify-self: start; font-size: 14.5px; padding-bottom: 2px; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size var(--soft) var(--ease); }
+.jr-list a:hover .jr-t { background-size: 100% 1px; }
+.jr-list div .jr-t { color: #3A3F47; }
+.notes .jr-list { margin-top: 18px; }
+
+/* Article: a centered, narrow column. */
+.ar-head { display: grid; gap: 16px; justify-items: center; max-width: 760px; margin: 0 auto; padding: clamp(48px, 7vw, 96px) var(--gutter) clamp(32px, 4vw, 48px); text-align: center; }
+.ar-head h1 { font-size: clamp(26px, 3.4vw, 44px); line-height: 1.08; }
+.ar-img { max-width: 760px; margin: 0 auto; padding: 0 var(--gutter); }
+.ar-img img { display: block; width: 100%; }
+.ar .article { padding-bottom: clamp(80px, 10vw, 150px); font-size: 14.5px; }
+.ar .article h2 { margin-top: 3em; font: 400 11px/1.4 var(--font-body); letter-spacing: .14em; color: var(--muted); }
+.ar .article h3 { font: 600 14.5px/1.4 var(--font-body); text-transform: none; letter-spacing: 0; margin-top: 1.8em; }
+.ar .article .kicker { font-size: 1.1rem; }
+
+@media (max-width: 800px) {
+  .ab { grid-template-columns: 1fr; padding-right: 0; }
+  .ab-text { position: static; max-width: none; padding: 32px var(--gutter) 0; }
+  .jr-list li > * { grid-template-columns: 1fr auto; gap: 6px 16px; padding: 18px 0; }
+  .jr-t { grid-column: 1 / -1; order: -1; }
+  .jr-go:empty { display: none; }
+  .jr-by { justify-self: end; }
+  .jr-go:not(:empty) { display: none; }
+}
+
+/* Fixes: figures are full-bleed (browsers add 40px side margins by default),
+   and the About lead line needs more weight than the column's body text. */
+figure { margin: 0; }
+.ab-text .ab-lead { font: 400 clamp(22px, 2.3vw, 32px)/1.15 var(--font-head); color: var(--ink); }
+@media (max-width: 800px) { .jr-list a .jr-t::after { content: " →"; } }
