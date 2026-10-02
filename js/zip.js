@@ -59,6 +59,7 @@
     pull.style.top = upper;
     pull.style.opacity = 1 - seg(p, 0.46, 0.54);
     pull.setAttribute('aria-valuenow', Math.round(u * 100));
+    zip.style.setProperty('--open', u.toFixed(3));
     cue.style.opacity = 1 - seg(p, 0, 0.04);
     hint.style.opacity = 1 - seg(p, 0, 0.03);
 
@@ -86,7 +87,7 @@
   let cur = target(), raf = 0;
   const tick = () => {
     const t = target();
-    cur += (t - cur) * 0.14;
+    cur += (t - cur) * (window.CX && CX.smooth ? 0.4 : 0.2);   // the motion engine already eases the scroll
     if (Math.abs(t - cur) < 0.0005) cur = t;
     render(cur);
     raf = cur === t ? 0 : requestAnimationFrame(tick);
@@ -100,7 +101,9 @@
 
   /* Pull: drag it down (or use the keyboard). Dragging maps the pointer to a pull position and
      scrolls the page to match; letting go near the bottom finishes the entrance by itself. */
-  const scrollToProgress = (p, smooth) => window.scrollTo({ top: start + p * span, behavior: smooth ? 'smooth' : 'instant' });
+  const scrollToProgress = (p, smooth) => (window.CX
+    ? CX.scrollTo(start + p * span, { immediate: !smooth })
+    : window.scrollTo({ top: start + p * span, behavior: smooth ? 'smooth' : 'instant' }));
   const pFromPull = u => (1 - Math.cbrt(1 - clamp(u))) * UNZIP_END;   // inverse of out() for act 1
   let dragging = false;
   pull.addEventListener('pointerdown', e => {

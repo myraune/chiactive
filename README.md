@@ -24,15 +24,38 @@ Double-click `../start-server-mac.command` (Mac) or `../start-server-windows.bat
 - The **real** ChiActive patch was then printed onto each jacket with a script, so the logo is always correct and follows the fabric's shading.
 - The files are in `images/ai/`. Cutouts with transparent backgrounds are in `images/ai/cutouts/`. The shop uses the versions on pure white in `images/ai/white/`.
 
-## The Homepage: Unzip to Enter
+## The Homepage: a Scroll Film
 
-- **Loading screen:** only the logo, with a thin beam of light sweeping across it. It shows once per browser session.
-- **Unzip intro** (`js/zip.js`): the Lakeshore Shell stands in front of the giant CHIACTIVE wordmark. Scrolling, or dragging the zip pull (which carries the Chicago star), unzips the jacket in three acts:
-  1. **Unzip:** the pull slides down the zip and the upper halves open into a V. Through the gap you see the quilted lining and the woven neck label, "ChiActive · Collection 01 · Chicago".
-  2. **Doors:** both halves swing out like doors while the lining grows to fill the screen, so you are now inside the jacket.
-  3. **Inside:** Collection 01 ("Six jackets. One city.") rises out of the lining, one jacket at a time, as the entrance to the rest of the site.
-- **How it works:** the section is a tall scroll track with a pinned stage. The scroll position is the only source of truth, so dragging the pull just scrolls the page, and letting go near the bottom finishes the entrance by itself. The jacket is four copies of one cut-out, clipped along the zip line, and the upper two rotate around the pull like a hinge. Every frame only changes transforms, clip-paths and opacity.
-- **Reduce motion:** with this setting on, the page skips the animation and shows the collection directly. Add `?motion=1` to the address to force the animation on.
+The homepage is told in scenes, and scrolling plays them. All the animation code is our own, with no libraries:
+- `js/motion.js` is the engine: smooth scroll, scenes, text reveals and the hiding header.
+- `js/zip.js` runs the opening scene.
+- `js/home.js` runs the other scenes.
+
+0. **Loading screen and entrance:** only the logo, with a light beam sweeping across it (once per session). Then the CHIACTIVE letters rise one by one and the jacket stands up.
+1. **Unzip:** scroll, or drag the zip pull with the Chicago star, to unzip the Lakeshore Shell.
+   - The halves open into a V with zipper teeth along the edges, and you see the quilted lining and the woven neck label inside.
+   - The halves then swing out like doors, and the lining fills the screen, so you are inside the jacket.
+   - Collection 01 rises out of it: "Six jackets. One city."
+2. **Manifesto:** a big sentence whose words light up one by one as it passes the middle of the screen, then an outlined "FOUR KINDS OF COLD" marquee that speeds up, reverses and skews with your scrolling.
+3. **Four kinds of cold:** a pinned stage that scrolls sideways through four full-screen panels:
+   - January on the L platform: 312 Down Parka.
+   - February on the frozen breakwater: Lakeshore Shell.
+   - April on the quad: Loop Puffer.
+   - An October night in the rain, drawn live on a canvas: Night Line Shell.
+
+   In each panel the photo lags behind and the month races ahead for depth, the temperature counts as you scroll, and the jacket links to its page.
+4. **The star:** the camera zooms from the jacket into the chest patch, then into the red star, until the star fills the screen: "The star of the Chicago flag. On every jacket we make."
+   - The patch position was measured on the photo with template matching, and the star inside the badge with colour detection, so every handoff lines up.
+   - A vector star takes over at the end, so it stays sharp at any size.
+5. **Shot in Chicago:** a gallery of three columns that drift at different speeds, and photos that unmask upward as they appear.
+6. **Finale:** the page lifts off like a curtain and reveals the footer underneath with a giant CHIACTIVE.
+
+**Also on every page:**
+- Smooth (inertia) scrolling with the mouse wheel.
+- Headings that rise in word by word.
+- Page transitions in Chrome, Edge and Safari 18+: pages cross-fade, and the jacket photo flies from the list into the product page.
+
+**Reduce motion:** with this setting on, there is no smooth scroll and nothing is pinned or animated, and every scene is simply shown. Add `?motion=1` to the address to force the animation on.
 
 ## Design
 
@@ -59,6 +82,7 @@ Double-click `../start-server-mac.command` (Mac) or `../start-server-windows.bat
 | `checkout.html` | Demo checkout. Nothing is sent and no payment is taken. |
 | `js/products.js` | Product catalog used by the cart, search and checkout |
 | `js/main.js` | Cart drawer, menu, search, product page, filters, checkout |
+| `js/motion.js`, `js/zip.js`, `js/home.js` | The motion engine and the homepage scenes |
 | `_archive/` | Earlier versions and explorations: `concepts/`, `light-v1/`, `lake-effect-v2/`, `north-form/`, and `xray-reveal/` (the dropped X-ray hover effect) |
 
 ## Honest Notes
