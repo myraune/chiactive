@@ -24,13 +24,15 @@ Double-click `../start-server-mac.command` (Mac) or `../start-server-windows.bat
 - The **real** ChiActive patch was then printed onto each jacket with a script, so the logo is always correct and follows the fabric's shading.
 - The files are in `images/ai/`. Cutouts with transparent backgrounds are in `images/ai/cutouts/`. The shop uses the versions on pure white in `images/ai/white/`.
 
-## The Homepage Hero
+## The Homepage: Unzip to Enter
 
 - **Loading screen:** only the logo, with a thin beam of light sweeping across it. It shows once per browser session.
-- **Hero:** only the giant CHIACTIVE wordmark and a jacket on pure white, slowly crossfading to the next jacket every few seconds.
-- **Parallax:** the jacket drifts and tilts slightly toward the mouse while the wordmark moves the other way, for depth. It floats gently over a soft shadow.
-- **View label:** over the jacket, a round black "View" label follows the mouse, and clicking the jacket opens its product page. Every movement is a GPU transform in a single animation loop, so it stays smooth.
-- **Reduce motion:** with this setting on, the jacket stays still. Add `?motion=1` to the address to force mouse movement on.
+- **Unzip intro** (`js/zip.js`): the Lakeshore Shell stands in front of the giant CHIACTIVE wordmark. Scrolling, or dragging the zip pull (which carries the Chicago star), unzips the jacket in three acts:
+  1. **Unzip:** the pull slides down the zip and the upper halves open into a V. Through the gap you see the quilted lining and the woven neck label, "ChiActive · Collection 01 · Chicago".
+  2. **Doors:** both halves swing out like doors while the lining grows to fill the screen, so you are now inside the jacket.
+  3. **Inside:** Collection 01 ("Six jackets. One city.") rises out of the lining, one jacket at a time, as the entrance to the rest of the site.
+- **How it works:** the section is a tall scroll track with a pinned stage. The scroll position is the only source of truth, so dragging the pull just scrolls the page, and letting go near the bottom finishes the entrance by itself. The jacket is four copies of one cut-out, clipped along the zip line, and the upper two rotate around the pull like a hinge. Every frame only changes transforms, clip-paths and opacity.
+- **Reduce motion:** with this setting on, the page skips the animation and shows the collection directly. Add `?motion=1` to the address to force the animation on.
 
 ## Design
 
