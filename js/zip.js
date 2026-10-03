@@ -15,7 +15,7 @@
   const pin = q('.zip-pin'), photo = q('.zip-photo'), canvas = q('.zip-gl'), badgeImg = q('.zip-badge'), frames = q('[data-zip-frames]');
   const pull = q('.zip-pull'), hint = q('.zip-hint'), cue = q('.zip-cue'), word = q('.zip-word');
   const inside = q('.zip-inside'), head = q('.zi-head'), all = q('.zi-all'), items = [...zip.querySelectorAll('.zi-item')];
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches && !/[?&]motion=1/.test(location.search);
+  const reduce = window.CX ? CX.reduce : matchMedia('(prefers-reduced-motion: reduce)').matches;   // same switch as the rest of the site
   const gl = !reduce && canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false });
   if (!gl) { zip.classList.add('zip-still'); return; }
 
