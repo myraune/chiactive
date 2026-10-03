@@ -1,257 +1,268 @@
-/* Unzip intro (homepage), drawn with WebGL.
-   The Lakeshore Shell is a mesh of about 15,000 points. Scrolling, or dragging the zip pull, moves
-   the pull down the zip, and only the fabric near the zip moves:
-     - Above the pull the two edges part in a soft curve: closed at the pull, widest at the collar.
-     - The sleeves and shoulders stay still; the fabric in between bunches up and darkens like a fold.
-     - Each opened edge shows its facing (the inside of the front panel) and its zipper teeth.
-     - Through the opening you see the quilted lining with the woven neck label.
-   The camera follows the pull down the jacket. Once it is unzipped, the camera flies into the
-   opening, the lining fills the screen and Collection 01 rises out of it.
-   The scroll position is the only source of truth: dragging the pull just scrolls the page. */
+/* Unzip intro (homepage). Three shots, all driven by the scroll position:
+     1. The jacket   - the Lakeshore Shell stands in front of the CHIACTIVE wordmark. Scrolling pushes
+                       the camera into the zip at the collar. (If images/ai/unzip/ holds an AI-made
+                       video as frames, those frames play here instead.)
+     2. Macro unzip  - the screen is now the jacket's fabric, drawn live in a WebGL shader: blue
+                       ripstop, navy zip tape, metal teeth that interlock, and the ChiActive patch.
+                       The pull slides down; above it the two sides part in a soft V and cast a
+                       shadow into the opening, where Collection 01 is waiting.
+     3. The way in   - both sides slide off the screen and the collection is there.
+   Dragging the zip pull just scrolls the page, so scroll and drag can never disagree. */
 (() => {
   const zip = document.querySelector('[data-zip]');
   if (!zip) return;
   const q = s => zip.querySelector(s);
-  const pin = q('.zip-pin'), canvas = q('.zip-gl'), src = q('.zip-src'), pull = q('.zip-pull'), hint = q('.zip-hint');
-  const cue = q('.zip-cue'), word = q('.zip-word'), head = q('.zi-head'), all = q('.zi-all'), items = [...zip.querySelectorAll('.zi-item')];
+  const pin = q('.zip-pin'), photo = q('.zip-photo'), canvas = q('.zip-gl'), badgeImg = q('.zip-badge'), frames = q('[data-zip-frames]');
+  const pull = q('.zip-pull'), hint = q('.zip-hint'), cue = q('.zip-cue'), word = q('.zip-word');
+  const inside = q('.zip-inside'), head = q('.zi-head'), all = q('.zi-all'), items = [...zip.querySelectorAll('.zi-item')];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches && !/[?&]motion=1/.test(location.search);
-  const gl = !reduce && canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: true });
+  const gl = !reduce && canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false });
   if (!gl) { zip.classList.add('zip-still'); return; }
 
-  /* ---------- Geometry of the jacket (measured on the cut-out) ---------- */
-  const AR = 931 / 1312;               // image width / height
-  const SEAM = 0.5;                    // the zip runs down the middle
-  const TOP = 0.13, BOTTOM = 0.92;     // where the zip starts and ends (share of the height)
-  const UNZIP_END = 0.55;              // share of the scroll used to unzip
-  const PULL_FROM = 0.24, PULL_TO = 0.8;    // the pull travels from 24% to 80% of the screen height
+  /* Measured on the cut-out (images/ai/cutouts/lakeshore-shell-hd.webp, 931 x 1312). */
+  const AR = 931 / 1312;
+  const COLLAR = 0.135;                                    // where the zip starts, share of the height
+  const PATCH = { x: 0.5502, y: 0.3068, w: 0.0687 };       // the chest patch
+  const MACRO = 1.8;                                       // in the macro shot the jacket is 1.8 screens wide
+  const PULL_H = 0.035;                                    // the pull is 3.5% of the jacket's height
 
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const seg = (p, a, b) => clamp((p - a) / (b - a));
-  const out = t => 1 - Math.pow(1 - t, 3);
-  const inOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const lerp = (a, b, t) => a + (b - a) * t;
-  const even = t => t * t * (3 - 2 * t);     // a steady pull: eases in and out, even in the middle
+  const even = t => t * t * (3 - 2 * t);
+  const inOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const out = t => 1 - Math.pow(1 - t, 3);
 
-  /* ---------- Shaders ---------- */
-  const GAP = `
-    uniform float uS, uTop, uCapPx, uSlope, uBoxW, uBoxH;
-    // Half the opening at height y, in texture units: zero at the pull, growing above it and
-    // levelling off at uCapPx. Above the zip (the hood) nothing opens.
-    float gapAt(float y) {
-      float d = max(uS - y, 0.0) * uBoxH;
-      float g = uCapPx * (1.0 - exp(-uSlope * d / max(uCapPx, 1.0)));
-      return g / uBoxW * smoothstep(uTop - 0.05, uTop + 0.01, y);
-    }`;
-  const VS_JACKET = `
-    attribute vec2 aUV; attribute float aSide;
-    uniform vec4 uBox; uniform vec2 uRes; uniform float uW;
-    varying vec2 vUV; varying float vDisp; varying float vFold;
-    ${GAP}
-    float fall(float u) { return 1.0 - smoothstep(0.0, uW, u); }
+  /* ---------- The macro shader: one full-screen triangle, everything computed per pixel ---------- */
+  const VS = 'attribute vec2 aPos; void main() { gl_Position = vec4(aPos, 0.0, 1.0); }';
+  const FS = `
+    precision highp float;
+    uniform vec2 uRes; uniform float uDpr, uAlpha;
+    uniform float uCx, uYs, uK, uB, uExtra, uT, uP, uTape, uFall;
+    uniform vec4 uPatch; uniform sampler2D uBadge; uniform float uHasBadge;
+
+    float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float noise(vec2 p) {
+      vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
+    }
+    // Half the opening at height y: zero at the pull, a rounded V above it (a hyperbola).
+    float gapAt(float y) { float d = max(uYs - y, 0.0) / uB; return uK * uB * (sqrt(1.0 + d * d) - 1.0); }
+    // How much of that the fabric follows, by distance from the zip: all of it at the zip, none far away.
+    float follow(float s) { return 1.0 - smoothstep(0.0, uFall, s); }
+    // Which point of each half's fabric lands on screen x (the inverse of the bend, by iteration).
+    float matL(float x, float g) { float m = x + g + uExtra; for (int i = 0; i < 8; i++) m = x + g * follow(uCx - m) + uExtra; return m; }
+    float matR(float x, float g) { float m = x - g - uExtra; for (int i = 0; i < 8; i++) m = x - g * follow(m - uCx) - uExtra; return m; }
+
+    vec3 fabric(vec2 m, float bend) {
+      vec3 c = vec3(0.262, 0.668, 0.905);
+      float w = noise(m / 260.0) * 0.6 + noise(m / 95.0) * 0.4;           // soft wrinkles
+      c *= 0.84 + 0.24 * w;
+      vec2 r = abs(fract(m / 9.0) - 0.5);                                   // ripstop grid
+      c *= 1.0 + 0.06 * (1.0 - smoothstep(0.0, 0.08, min(r.x, r.y)));
+      c *= 0.985 + 0.03 * hash(floor(m));                                   // weave grain
+      c *= 1.0 - 0.06 * (m.y / uRes.y);                                     // light from above
+      return c * (1.0 - bend);
+    }
+    float placket(float s) { return 1.0 - 0.22 * exp(-(s - uT * 0.5 - uTape) / 14.0); }   // fabric dips beside the zip
+    vec3 tape(vec2 m) {
+      float weave = 0.5 + 0.5 * sin((m.x + m.y) * 1.9);
+      return vec3(0.105, 0.15, 0.225) * (0.9 + 0.12 * weave);
+    }
+    // One tooth: a rounded block. q.x runs from the tape (0) to the tip (uT), q.y along the zip.
+    vec4 tooth(vec2 q, float len) {
+      vec2 c = vec2(uT * 0.5, len * 0.5), h = vec2(uT * 0.5, len * 0.5 - uP * 0.05);
+      float r = uP * 0.16;
+      vec2 d = abs(q - c) - h + r;
+      float sdf = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
+      float a = clamp(0.5 - sdf, 0.0, 1.0);
+      float across = clamp(q.y / len, 0.0, 1.0);
+      float shade = 0.28 + 0.72 * pow(sin(3.14159 * across), 0.65);          // round in section
+      shade *= 0.75 + 0.25 * smoothstep(uT, 0.0, q.x);                       // tips a touch darker
+      float spec = pow(max(0.0, 1.0 - abs(across - 0.32) * 5.0), 3.0) * 0.6;  // a hot highlight
+      vec3 col = mix(vec3(0.17, 0.19, 0.22), vec3(0.80, 0.83, 0.87), shade) + spec;
+      col *= 1.0 - 0.35 * smoothstep(-2.5, 0.0, sdf);                        // dark rim
+      return vec4(col * a, a);
+    }
+
     void main() {
-      float u = abs(aUV.x - 0.5);
-      float g = gapAt(aUV.y);
-      float f = fall(u);
-      vec2 px = uBox.xy + vec2(aUV.x + aSide * g * f, aUV.y) * uBox.zw;
-      gl_Position = vec4((px / uRes * 2.0 - 1.0) * vec2(1.0, -1.0), 0.0, 1.0);
-      vUV = aUV; vDisp = g * f;
-      vFold = g * (f - fall(u + 0.02)) / 0.02;      // how much the fabric bunches here
+      vec2 px = vec2(gl_FragCoord.x, uRes.y * uDpr - gl_FragCoord.y) / uDpr;    // CSS pixels, y down
+      float x = px.x, y = px.y;
+      float g = gapAt(y);
+      float slot = fract(y / uP);
+      float bendK = g / max(uFall, 1.0) * 1.6;
+
+      // Left half
+      float mL = matL(x, g), sL = uCx - mL;
+      vec4 L = vec4(0.0);
+      float bendL = bendK * follow(sL) * (1.0 - follow(sL)) * 4.0 * 0.5;
+      if (sL > uT * 0.5 + uTape) L = vec4(fabric(vec2(mL, y), bendL) * placket(sL), 1.0);
+      else if (sL > uT * 0.5) L = vec4(tape(vec2(mL, y)), 1.0);
+      if (sL > uT * 0.5 + uTape - 1.0 && sL < uT * 0.5 + uTape + 1.5) L.rgb *= 0.78;  // stitched edge
+      if (sL <= uT * 0.5 && sL > -uT * 0.5 - 1.0 && slot < 0.5) L = tooth(vec2(uT * 0.5 - sL, slot * uP), uP * 0.5);
+
+      // Right half (its teeth sit in the other half of each slot, so closed teeth interlock)
+      float mR = matR(x, g), sR = mR - uCx;
+      vec4 R = vec4(0.0);
+      float bendR = bendK * follow(sR) * (1.0 - follow(sR)) * 4.0 * 0.5;
+      if (sR > uT * 0.5 + uTape) {
+        vec3 c = fabric(vec2(mR, y), bendR) * placket(sR);
+        vec2 pu = (vec2(mR, y) - uPatch.xy) / uPatch.zw;                    // the patch rides on this half
+        if (uHasBadge > 0.5 && pu.x > 0.0 && pu.x < 1.0 && pu.y > 0.0 && pu.y < 1.0) {
+          vec4 b = texture2D(uBadge, pu);
+          float sh = texture2D(uBadge, pu - vec2(0.0, 0.035)).a;                // stitched patch casts a small shadow
+          c = (c * (1.0 - 0.35 * sh * (1.0 - b.a))) * (1.0 - b.a) + b.rgb;
+        }
+        R = vec4(c, 1.0);
+      } else if (sR > uT * 0.5) R = vec4(tape(vec2(mR, y)), 1.0);
+      if (sR > uT * 0.5 + uTape - 1.0 && sR < uT * 0.5 + uTape + 1.5) R.rgb *= 0.78;
+      if (sR <= uT * 0.5 && sR > -uT * 0.5 - 1.0 && slot >= 0.5) R = tooth(vec2(uT * 0.5 - sR, (slot - 0.5) * uP), uP * 0.5);
+
+      vec4 c = L + R * (1.0 - L.a);
+      // The opening: a soft shadow from both edges falls onto what is inside.
+      float eL = uCx - uT * 0.5 - g - uExtra, eR = uCx + uT * 0.5 + g + uExtra;
+      float dist = min(x - eL, eR - x);
+      float sh = 0.55 * exp(-max(dist, 0.0) / 26.0) * step(0.5, g + uExtra);
+      c += vec4(0.0, 0.0, 0.0, sh) * (1.0 - c.a);
+      gl_FragColor = c * uAlpha;
     }`;
-  const FS_JACKET = `
-    precision mediump float;
-    uniform sampler2D uTex; uniform float uCapUV;
-    varying vec2 vUV; varying float vDisp; varying float vFold;
-    void main() {
-      vec4 c = texture2D(uTex, vUV);
-      float u = abs(vUV.x - 0.5);
-      float open = clamp(vDisp / 0.01, 0.0, 1.0);
-      // Facing: a narrow band along each opened edge shows the inside of the front panel.
-      float facing = (1.0 - smoothstep(0.016, 0.034, u)) * open;
-      c.rgb = mix(c.rgb, vec3(0.80, 0.83, 0.87) * c.a, facing * 0.9);
-      // Zipper teeth on the very edge.
-      float teeth = (1.0 - smoothstep(0.006, 0.012, u)) * open;
-      float f = fract(vUV.y * 210.0);
-      float stripe = smoothstep(0.35, 0.5, f) * (1.0 - smoothstep(0.75, 0.9, f));
-      c.rgb = mix(c.rgb, mix(vec3(0.16, 0.18, 0.21), vec3(0.74, 0.77, 0.81), stripe) * c.a, teeth);
-      // Fold: bunched fabric turns away from the light.
-      c.rgb *= 1.0 - clamp(vFold / max(uCapUV, 0.001), 0.0, 1.0) * 0.32;
-      gl_FragColor = c;
-    }`;
-  const VS_QUAD = `
-    attribute vec2 aUV; uniform vec4 uBox; uniform vec2 uRes; varying vec2 vUV;
-    void main() { vec2 px = uBox.xy + aUV * uBox.zw; gl_Position = vec4((px / uRes * 2.0 - 1.0) * vec2(1.0, -1.0), 0.0, 1.0); vUV = aUV; }`;
-  const FS_LINING = `
-    precision mediump float;
-    uniform sampler2D uTex, uLabel; uniform vec4 uLabelRect;
-    varying vec2 vUV;
-    ${GAP}
-    void main() {
-      float a = texture2D(uTex, vUV).a;
-      if (a < 0.01) { gl_FragColor = vec4(0.0); return; }
-      vec2 p = vUV * vec2(uBoxW, uBoxH);
-      float cell = uBoxW * 0.045;                                  // quilt diamonds scale with the jacket
-      float q1 = abs(fract((p.x + p.y) / cell) - 0.5), q2 = abs(fract((p.x - p.y) / cell) - 0.5);
-      float seam = 1.0 - smoothstep(0.46, 0.5, max(q1, q2));
-      vec3 col = vec3(0.905, 0.92, 0.94) - seam * 0.07 + (0.5 - min(q1, q2)) * 0.05;
-      // Depth: the lining is in shadow close to the edges of the opening.
-      float e = gapAt(vUV.y) - abs(vUV.x - 0.5);
-      col *= 1.0 - 0.5 * (1.0 - smoothstep(0.0, 0.045, e));
-      vec2 lp = (vUV - uLabelRect.xy) / uLabelRect.zw;
-      if (lp.x > 0.0 && lp.x < 1.0 && lp.y > 0.0 && lp.y < 1.0) col = texture2D(uLabel, lp).rgb;
-      gl_FragColor = vec4(col * a, a);
-    }`;
-  function program(vs, fs) {
-    const p = gl.createProgram();
-    [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]].forEach(([t, s]) => {
-      const sh = gl.createShader(t); gl.shaderSource(sh, s); gl.compileShader(sh);
-      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
-      gl.attachShader(p, sh);
-    });
-    gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-    const loc = {};
-    const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
-    for (let i = 0; i < n; i++) { const name = gl.getActiveUniform(p, i).name; loc[name] = gl.getUniformLocation(p, name); }
-    return { p, loc, aUV: gl.getAttribLocation(p, 'aUV'), aSide: gl.getAttribLocation(p, 'aSide') };
+  function compile(type, src) {
+    const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
   }
-  let jacketProg, liningProg;
-  try { jacketProg = program(VS_JACKET, FS_JACKET); liningProg = program(VS_QUAD, FS_LINING); }
-  catch (err) { console.warn('Unzip intro fell back:', err); zip.classList.add('zip-still'); return; }
+  let prog, U = {};
+  try {
+    prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  } catch (err) { console.warn('Unzip intro fell back:', err); zip.classList.add('zip-still'); return; }
+  gl.useProgram(prog);
+  for (let i = 0, n = gl.getProgramParameter(prog, gl.ACTIVE_UNIFORMS); i < n; i++) {
+    const name = gl.getActiveUniform(prog, i).name; U[name] = gl.getUniformLocation(prog, name);
+  }
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'aPos');
+  gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-  /* ---------- Mesh: two halves that meet at the seam, with more columns close to the zip ---------- */
-  const COLS = 44, ROWS = 170;
-  const verts = [], idx = [];
-  [-1, 1].forEach(side => {
-    const base = verts.length / 3;
-    for (let r = 0; r <= ROWS; r++) {
-      for (let c = 0; c <= COLS; c++) verts.push(SEAM + side * Math.pow(c / COLS, 1.35) * SEAM, r / ROWS, side);
-    }
-    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-      const i = base + r * (COLS + 1) + c;
-      idx.push(i, i + 1, i + COLS + 1, i + 1, i + COLS + 2, i + COLS + 1);
-    }
-  });
-  const meshBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, meshBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
-  const idxBuf = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
-  const quadBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
-
-  /* ---------- Textures: the jacket, and the woven neck label drawn on a 2D canvas ---------- */
-  function texture(source) {
-    const t = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, t);
+  let hasBadge = 0;
+  const loadBadge = () => {
+    const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, t);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, badgeImg);
     [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]
       .forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
-    return t;
+    hasBadge = 1; requestAnimationFrame(() => render(cur));   // next frame: the loop below is set up by then
+  };
+  if (badgeImg.complete && badgeImg.naturalWidth) loadBadge(); else badgeImg.addEventListener('load', loadBadge, { once: true });
+
+  /* ---------- Optional: AI video frames for shot 1 (images/ai/unzip/0001.webp ...) ---------- */
+  let seq = null;
+  if (frames) {
+    const n = +frames.dataset.zipFrames, base = frames.dataset.src;
+    const ctx = frames.getContext('2d');
+    seq = { ctx, imgs: Array.from({ length: n }, (_, i) => { const im = new Image(); im.decoding = 'async'; im.src = `${base}${String(i + 1).padStart(4, '0')}.webp`; return im; }), last: -1 };
   }
-  function labelCanvas() {
-    const c = document.createElement('canvas'); c.width = 440; c.height = 140;
-    const x = c.getContext('2d');
-    x.fillStyle = '#2F3F53'; x.fillRect(0, 0, 440, 140);
-    x.strokeStyle = 'rgba(255, 255, 255, .35)'; x.lineWidth = 2; x.strokeRect(10, 10, 420, 120);
-    x.fillStyle = '#fff'; x.textAlign = 'center';
-    x.font = '700 54px "Finlandica Headline", "Arial Narrow", Arial, sans-serif'; x.fillText('CHIACTIVE', 220, 72);
-    x.font = '500 20px "Google Sans", Arial, sans-serif'; x.fillText('COLLECTION 01  ·  CHICAGO', 220, 108);
-    return c;
-  }
-  let jacketTex = null, labelTex = null;
-  const ready = () => {
-    jacketTex = texture(src);
-    (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { labelTex = texture(labelCanvas()); render(cur); });
-    zip.classList.add('zip-gl-on');
-    render(cur);
+
+  /* ---------- Layout ---------- */
+  let vw = 0, vh = 0, dpr = 1, base = null, Wj = 0, Hj = 0, T = 0;
+  const size = () => {
+    vw = pin.clientWidth; vh = pin.clientHeight; dpr = Math.min(devicePixelRatio || 1, 1.5);
+    canvas.width = Math.round(vw * dpr); canvas.height = Math.round(vh * dpr);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    const h = Math.min(vh * 0.9, (vw * 0.94) / AR), w = h * AR;         // the jacket, standing in the frame
+    base = { x: (vw - w) / 2, y: vh - h - vh * 0.03, w, h };
+    photo.style.width = w + 'px'; photo.style.height = h + 'px';
+    Wj = vw * MACRO; Hj = Wj / AR;                                       // the jacket's size in the macro shot
+    T = clamp(vw * 0.034, 22, 46);                                       // tooth length: big, it's a macro shot
+    if (seq) { seq.ctx.canvas.width = Math.round(vw * dpr); seq.ctx.canvas.height = Math.round(vh * dpr); seq.last = -1; }
   };
 
-  /* ---------- Layout and scroll geometry ---------- */
-  let vw = 0, vh = 0, W0 = 0, H0 = 0;
-  const size = () => {
-    vw = pin.clientWidth; vh = pin.clientHeight;
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    canvas.width = Math.round(vw * dpr); canvas.height = Math.round(vh * dpr);
-    H0 = vh * 1.32; W0 = H0 * AR;                                // big: the jacket is taller than the screen
-    if (W0 > vw * 1.08) { W0 = vw * 1.08; H0 = W0 / AR; }       // phones: a touch wider than the screen
-    gl.viewport(0, 0, canvas.width, canvas.height);
-  };
+  /* ---------- Scroll ---------- */
   let start = 0, span = 1;
   const measure = () => {
     start = zip.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(pin).top) || 0);
     span = Math.max(1, zip.offsetHeight - pin.offsetHeight);
   };
   const target = () => clamp((scrollY - start) / span);
+  const SHOT1 = [0.03, 0.22], HANDOFF = [0.19, 0.24], UNZIP = [0.22, 0.7], OPEN = [0.7, 0.88];
 
   function render(p) {
     if (!vw) return;
-    const u = even(seg(p, 0, UNZIP_END));         // act 1: unzip
-    const z = inOut(seg(p, 0.5, 0.8));            // act 2: fly into the opening
-    const S = lerp(TOP, BOTTOM, u);
-    // Camera, act 1: the jacket slides up so the pull stays in view.
-    const pullY = lerp(PULL_FROM, PULL_TO, u) * vh;
-    let bx = (vw - W0) / 2, by = pullY - S * H0, bw = W0, bh = H0;
-    // Camera, act 2: zoom into the opening, which glides to the centre of the screen.
-    if (z > 0) {
-      const s = Math.exp(Math.log(7) * z), fy = 0.5;
-      const sy = lerp(by + fy * H0, vh * 0.5, z);
-      bw = W0 * s; bh = H0 * s; bx = vw / 2 - 0.5 * bw; by = sy - fy * bh;
-    }
-    const capPx = bw * (0.11 + 0.17 * z);         // the opening widens as we fly in
-    const slope = 0.3 + 0.3 * z;
-    const fallW = 0.34 + 0.12 * z;
-
-    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-    if (jacketTex) {
-      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-      const use = prog => {
-        gl.useProgram(prog.p);
-        const L = prog.loc;
-        gl.uniform4f(L.uBox, bx, by, bw, bh); gl.uniform2f(L.uRes, vw, vh);
-        gl.uniform1f(L.uS, S); gl.uniform1f(L.uTop, TOP); gl.uniform1f(L.uCapPx, capPx); gl.uniform1f(L.uSlope, slope);
-        gl.uniform1f(L.uBoxW, bw); gl.uniform1f(L.uBoxH, bh);
-        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, jacketTex); gl.uniform1i(L.uTex, 0);
-      };
-      // 1. The lining, under everything.
-      use(liningProg);
-      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, labelTex || jacketTex); gl.uniform1i(liningProg.loc.uLabel, 1);
-      gl.uniform4f(liningProg.loc.uLabelRect, labelTex ? 0.415 : -1, 0.135, 0.17, 0.054);
-      gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
-      gl.enableVertexAttribArray(liningProg.aUV); gl.vertexAttribPointer(liningProg.aUV, 2, gl.FLOAT, false, 0, 0);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      gl.disableVertexAttribArray(liningProg.aUV);
-      // 2. The jacket, unzipped.
-      use(jacketProg);
-      gl.uniform1f(jacketProg.loc.uW, fallW); gl.uniform1f(jacketProg.loc.uCapUV, capPx / bw);
-      gl.bindBuffer(gl.ARRAY_BUFFER, meshBuf); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
-      gl.enableVertexAttribArray(jacketProg.aUV); gl.vertexAttribPointer(jacketProg.aUV, 2, gl.FLOAT, false, 12, 0);
-      gl.enableVertexAttribArray(jacketProg.aSide); gl.vertexAttribPointer(jacketProg.aSide, 1, gl.FLOAT, false, 12, 8);
-      gl.drawElements(gl.TRIANGLES, idx.length, gl.UNSIGNED_SHORT, 0);
-      gl.disableVertexAttribArray(jacketProg.aUV); gl.disableVertexAttribArray(jacketProg.aSide);
+    const collarY = vh * 0.2;                                            // where the camera lands at the collar
+    /* Shot 1: push in from the jacket to the collar of the zip (exponential zoom = steady feel). */
+    const z = inOut(seg(p, ...SHOT1));
+    const sEnd = Wj / base.w, s = Math.exp(Math.log(sEnd) * z);
+    const fx = 0.5 * base.w, fy = COLLAR * base.h;                       // focus: the top of the zip
+    const sx = lerp(base.x + fx, vw / 2, z), sy = lerp(base.y + fy, collarY, z);
+    const tx = sx - fx * s, ty = sy - fy * s;
+    photo.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${s.toFixed(4)})`;
+    const hand = seg(p, ...HANDOFF);
+    photo.style.opacity = 1 - hand;
+    word.style.opacity = 1 - seg(p, 0.06, 0.16);
+    if (seq) {
+      const k = Math.round(seg(p, ...SHOT1) * (seq.imgs.length - 1));
+      const im = seq.imgs[k];
+      if (k !== seq.last && im.complete && im.naturalWidth) {
+        const c = seq.ctx.canvas, r = Math.max(c.width / im.naturalWidth, c.height / im.naturalHeight);
+        seq.ctx.drawImage(im, (c.width - im.naturalWidth * r) / 2, (c.height - im.naturalHeight * r) / 2, im.naturalWidth * r, im.naturalHeight * r);
+        seq.last = k;
+      }
+      frames.style.opacity = (p > 0.005 ? 1 : 0) * (1 - hand);
     }
 
-    // DOM pieces around the canvas.
-    pull.style.transform = `translate3d(${(vw / 2).toFixed(1)}px, ${pullY.toFixed(1)}px, 0)`;
-    pull.style.opacity = 1 - seg(p, 0.5, 0.56);
+    /* Shot 2 and 3: the macro zip, then both sides slide away. */
+    const u = even(seg(p, ...UNZIP)), d = inOut(seg(p, ...OPEN));
+    const Ys = lerp(collarY, vh * 1.25, u);
+    const grow = lerp(0.45, 1, out(seg(p, 0.2, 0.32)));                // teeth grow from the photo's scale
+    const t = T * grow;
+    canvas.style.opacity = hand;
+    if (hand > 0) {
+      gl.uniform2f(U.uRes, vw, vh); gl.uniform1f(U.uDpr, dpr); gl.uniform1f(U.uAlpha, 1);
+      gl.uniform1f(U.uCx, vw / 2); gl.uniform1f(U.uYs, Ys);
+      gl.uniform1f(U.uK, 0.34); gl.uniform1f(U.uB, Math.max(40, t * 3));
+      gl.uniform1f(U.uExtra, d * vw * 0.62);
+      gl.uniform1f(U.uT, t); gl.uniform1f(U.uP, t * 0.78); gl.uniform1f(U.uTape, t * 0.55);
+      gl.uniform1f(U.uFall, vw * 0.42);
+      const pw = PATCH.w * Wj;
+      gl.uniform4f(U.uPatch, vw / 2 + (PATCH.x - 0.5) * Wj, collarY + (PATCH.y - COLLAR) * Hj, pw, pw);
+      gl.uniform1f(U.uHasBadge, hasBadge); gl.uniform1i(U.uBadge, 0);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    /* The pull: rides the collar in shot 1 (scaled with the jacket), then the zip in shot 2. */
+    const jh = lerp(base.h * s, Hj, hand);                              // jacket height on screen
+    const pullX = lerp(tx + fx * s, vw / 2, hand), pullY = lerp(ty + fy * s, Ys, hand);
+    const ps = lerp((jh * PULL_H) / 140, clamp(vh / 640, 0.8, 1.3), hand);   // true to the photo, then a proper macro size
+    pull.style.transform = `translate3d(${pullX.toFixed(1)}px, ${pullY.toFixed(1)}px, 0) scale(${ps.toFixed(4)})`;
+    pull.style.opacity = 1 - seg(p, 0.6, 0.7);
     pull.setAttribute('aria-valuenow', Math.round(u * 100));
     hint.style.opacity = 1 - seg(p, 0, 0.03);
+    hint.style.transform = `translate3d(${(pullX + 26).toFixed(1)}px, ${(pullY + 4).toFixed(1)}px, 0)`;
     cue.style.opacity = 1 - seg(p, 0, 0.04);
-    canvas.style.opacity = 1 - seg(p, 0.8, 0.93);
-    word.style.opacity = 1 - seg(p, 0.48, 0.64);
-    word.style.transform = `translate(-50%, -54%) scale(${(1 + 0.08 * z).toFixed(4)})`;
-    // Act 3: the collection rises out of the lining, one jacket at a time.
-    const h = out(seg(p, 0.68, 0.86));
-    head.style.opacity = h; head.style.transform = `translate3d(0, ${((1 - h) * 24).toFixed(1)}px, 0)`;
+
+    /* Inside: Collection 01 waits behind the fabric and settles as the sides part. */
+    inside.style.opacity = hand >= 1 ? 1 : 0;
+    inside.style.transform = `scale(${(1.08 - 0.08 * Math.max(u * 0.6, d)).toFixed(4)})`;
+    const h2 = out(seg(p, 0.5, 0.78));
+    head.style.opacity = 0.35 + 0.65 * h2; head.style.transform = `translate3d(0, ${((1 - h2) * 24).toFixed(1)}px, 0)`;
     items.forEach((el, i) => {
-      const k = out(seg(p, 0.7 + i * 0.025, 0.9 + i * 0.02));
-      el.style.opacity = k; el.style.transform = `translate3d(0, ${((1 - k) * 70).toFixed(1)}px, 0)`;
+      const k = out(seg(p, 0.42 + i * 0.03, 0.8 + i * 0.02));
+      el.style.opacity = 0.3 + 0.7 * k; el.style.transform = `translate3d(0, ${((1 - k) * 50).toFixed(1)}px, 0)`;
     });
-    all.style.opacity = out(seg(p, 0.88, 0.99));
-    zip.classList.toggle('zip-in', p > 0.82);
+    all.style.opacity = out(seg(p, 0.84, 0.97));
+    zip.classList.toggle('zip-in', p > 0.84);
   }
 
   /* ---------- One rAF loop: ease the drawn progress toward the scroll progress ---------- */
   let cur = 0, raf = 0;
   const tick = () => {
     const t = target();
-    cur += (t - cur) * (window.CX && CX.smooth ? 0.4 : 0.2);   // the motion engine already eases the scroll
+    cur += (t - cur) * (window.CX && CX.smooth ? 0.4 : 0.2);
     if (Math.abs(t - cur) < 0.0004) cur = t;
     render(cur);
     raf = cur === t ? 0 : requestAnimationFrame(tick);
@@ -260,33 +271,28 @@
   addEventListener('scroll', wake, { passive: true });
   addEventListener('resize', () => { size(); measure(); render(cur); });
   addEventListener('load', () => { measure(); wake(); });
-  size(); measure(); cur = target();
-  if (src.complete && src.naturalWidth) ready(); else src.addEventListener('load', ready, { once: true });
-  render(cur);
+  size(); measure(); cur = target(); render(cur);
+  zip.classList.add('zip-gl-on');
 
   /* ---------- The pull: drag it down (or use the keyboard) ---------- */
   const scrollToProgress = (p, smooth) => (window.CX
     ? CX.scrollTo(start + p * span, { immediate: !smooth })
     : window.scrollTo({ top: start + p * span, behavior: smooth ? 'smooth' : 'instant' }));
-  const pFromPull = u => {                                               // inverse of even(), by bisection
-    u = clamp(u); let a = 0, b = 1;
-    for (let i = 0; i < 24; i++) { const m = (a + b) / 2; if (even(m) < u) a = m; else b = m; }
-    return (a + b) / 2 * UNZIP_END;
-  };
-  let dragging = false;
+  let drag = null;
   pull.addEventListener('pointerdown', e => {
-    dragging = true; pull.setPointerCapture(e.pointerId); zip.classList.add('zip-drag'); measure(); e.preventDefault();
+    measure();
+    drag = { y: e.clientY, p: target() };
+    pull.setPointerCapture(e.pointerId); zip.classList.add('zip-drag'); e.preventDefault();
   });
   pull.addEventListener('pointermove', e => {
-    if (!dragging) return;
-    const r = pin.getBoundingClientRect();
-    const u = ((e.clientY - r.top) / vh - PULL_FROM) / (PULL_TO - PULL_FROM);
-    scrollToProgress(pFromPull(u), false);
+    if (!drag) return;
+    // Pulling the full height of the screen takes you from the collar to the end of the unzip.
+    scrollToProgress(clamp(drag.p + (e.clientY - drag.y) / vh * UNZIP[1]), false);
   });
   const release = () => {
-    if (!dragging) return;
-    dragging = false; zip.classList.remove('zip-drag');
-    if (target() > UNZIP_END * 0.8) scrollToProgress(1, true);
+    if (!drag) return;
+    drag = null; zip.classList.remove('zip-drag');
+    if (target() > 0.45) scrollToProgress(1, true);
   };
   pull.addEventListener('pointerup', release);
   pull.addEventListener('pointercancel', release);

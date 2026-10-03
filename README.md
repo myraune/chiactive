@@ -32,10 +32,11 @@ The homepage is told in scenes, and scrolling plays them. All the animation code
 - `js/home.js` runs the other scenes.
 
 0. **Loading screen and entrance:** only the logo, with a light beam sweeping across it (once per session). Then the CHIACTIVE letters rise one by one and the jacket stands up.
-1. **Unzip** (WebGL): scroll, or drag the zip pull with the Chicago star, to unzip a large Lakeshore Shell like a real zip.
-   - The jacket is a mesh of about 15,000 points, and only the fabric near the zip moves. Above the pull the edges part in a soft curve: closed at the pull, widest at the collar. The sleeves and shoulders stay still, and the fabric in between bunches and darkens like a fold.
-   - Each opened edge shows its facing and its zipper teeth, and through the opening you see the quilted lining with the woven neck label.
-   - The camera follows the pull down the jacket, then flies into the opening until the lining fills the screen, and Collection 01 rises out of it: "Six jackets. One city."
+1. **Unzip** (`js/zip.js`), inspired by [Scroll Zipper](https://codepen.io/josetxu/pen/OJWoRvG), [Zipper Curtain](https://motionary.dev/animations/zipper-curtain) and macro zipper transitions in video editing:
+   - **The push-in:** the camera pushes in from the Lakeshore Shell to the zip at its collar. If AI video frames exist in `images/ai/unzip/`, they play here instead.
+   - **The macro zip:** the screen becomes the jacket's fabric, drawn live in a WebGL shader: blue ripstop, navy zip tape, interlocking metal teeth and the ChiActive patch.
+   - **Scrolling or dragging the pull:** above the pull the sides part in a soft V (a hyperbola) and cast a shadow into the opening, where Collection 01 is waiting. Then both sides slide off the screen.
+   - **Adding an AI video:** run `python3 tools/video_to_frames.py your-video.mp4`, then rebuild.
 2. **Manifesto:** a big sentence whose words light up one by one as it passes the middle of the screen, then an outlined "FOUR KINDS OF COLD" marquee that speeds up, reverses and skews with your scrolling.
 3. **Four kinds of cold:** a pinned stage that scrolls sideways through four full-screen panels:
    - January on the L platform: 312 Down Parka.
