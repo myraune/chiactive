@@ -314,7 +314,8 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.35); }
   .ftr > :first-child { grid-column: 1 / -1; }
   .form fieldset { grid-template-columns: 1fr; }
 }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation: none !important; } }
+/* Reduced motion follows the site's own switch (js/motion.js sets .cx-still), so a visitor who turns motion on gets it all. */
+.cx-still *, .cx-still *::before, .cx-still *::after { transition-duration: .01ms !important; animation: none !important; }
 
 /* Quiet 16:9 campaign band (homepage) */
 .wide-quiet { aspect-ratio: 1680 / 944; margin-top: clamp(80px, 10vw, 160px); }
