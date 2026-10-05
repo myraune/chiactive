@@ -1,8 +1,10 @@
-/* ChiActive Collection 01 catalog, used by the cart, search and checkout. Paths are relative to the site root. */
+/* ChiActive Collection 01 catalog, used by the cart, search and checkout.
+   Paths are relative to the site root. */
 window.CHIACTIVE_PRODUCTS = [
   {
     "id": "lakeshore-shell",
     "name": "Lakeshore Shell",
+    "short": "Lakeshore Shell",
     "category": "shells",
     "url": "jackets/lakeshore-shell.html",
     "price": 289,
@@ -24,6 +26,7 @@ window.CHIACTIVE_PRODUCTS = [
   {
     "id": "312-down-parka",
     "name": "312 Down Parka",
+    "short": "312 Down Parka",
     "category": "insulated",
     "url": "jackets/312-down-parka.html",
     "price": 349,
@@ -45,6 +48,7 @@ window.CHIACTIVE_PRODUCTS = [
   {
     "id": "loop-puffer",
     "name": "Loop Puffer",
+    "short": "Loop Puffer",
     "category": "insulated",
     "url": "jackets/loop-puffer.html",
     "price": 229,
@@ -66,6 +70,7 @@ window.CHIACTIVE_PRODUCTS = [
   {
     "id": "wacker-anorak",
     "name": "Wacker Anorak",
+    "short": "Wacker Anorak",
     "category": "layers",
     "url": "jackets/wacker-anorak.html",
     "price": 149,
@@ -87,6 +92,7 @@ window.CHIACTIVE_PRODUCTS = [
   {
     "id": "north-branch-fleece",
     "name": "North Branch Fleece",
+    "short": "North Branch Fleece",
     "category": "layers",
     "url": "jackets/north-branch-fleece.html",
     "price": 139,
@@ -108,6 +114,7 @@ window.CHIACTIVE_PRODUCTS = [
   {
     "id": "night-line-shell",
     "name": "Night Line Shell",
+    "short": "Night Line Shell",
     "category": "shells",
     "url": "jackets/night-line-shell.html",
     "price": 199,
