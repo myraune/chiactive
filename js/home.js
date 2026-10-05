@@ -45,7 +45,7 @@
     const track = ss.querySelector('.ss-track'), panels = [...ss.querySelectorAll('.ss-panel')], n = panels.length;
     const bars = [...ss.querySelectorAll('.ss-bars span')], num = ss.querySelector('[data-ss-n]');
     const parts = panels.map(el => ({
-      el, media: el.querySelector('.ss-media'), month: el.querySelector('.ss-month'), info: el.querySelector('.ss-info'),
+      el, media: el.querySelector('.ss-media'), frame: el.querySelector('.ss-frame'), month: el.querySelector('.ss-month'), info: el.querySelector('.ss-info'),
       temp: el.querySelector('[data-temp]'), cut: el.querySelector('.ss-hero-cut'),
       rain: el.querySelector('.ss-rain'),
     }));
@@ -57,7 +57,8 @@
       parts.forEach((o, i) => {
         const lp = i - x;                                      // 0 centred, +1 waiting on the right, -1 gone left
         if (Math.abs(lp) > 1.05) return;
-        o.media.style.transform = `translate3d(${(-lp * 22).toFixed(2)}vw, 0, 0)`;           // photo lags: depth
+        o.media.style.transform = `translate3d(${(-lp * 22).toFixed(2)}vw, 0, 0)`;           // blurred backdrop lags: depth
+        if (o.frame) o.frame.style.transform = `translate3d(${(lp * 9).toFixed(2)}vw, 0, 0) scale(${(1 - Math.abs(lp) * 0.08).toFixed(4)})`;   // the framed photo drifts in between
         o.month.style.transform = `translate3d(${(lp * 38).toFixed(2)}vw, 0, 0)`;            // month races ahead
         const k = out(seg(1 - Math.abs(lp), 0.25, 1));
         o.info.style.opacity = k; o.info.style.transform = `translate3d(0, ${((1 - k) * 40).toFixed(1)}px, 0)`;
