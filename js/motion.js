@@ -157,7 +157,18 @@
       try { localStorage.setItem('cx-motion', reduce ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
       location.reload();
     });
-    document.body.append(b);
+    // With motion on, the switch sits quietly in the footer. With motion reduced it floats in the
+    // corner (it is the way to turn motion on), and steps aside while the page is scrolling.
+    const ftr = document.querySelector('.ftr');
+    if (!reduce && ftr) ftr.insertBefore(b, ftr.querySelector('.ftr-word'));   // above the big wordmark
+    else {
+      document.body.append(b);
+      let t = 0;
+      addEventListener('scroll', () => {
+        b.classList.add('is-away'); clearTimeout(t);
+        t = setTimeout(() => b.classList.remove('is-away'), 900);
+      }, { passive: true });
+    }
   }
 
   /* ---------- Magnetic buttons ---------- */

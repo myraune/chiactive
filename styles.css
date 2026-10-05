@@ -853,3 +853,17 @@ html { scroll-behavior: auto; }
 /* The motion switch (only for visitors whose system asks for reduced motion). */
 .motion-switch { position: fixed; left: 16px; bottom: 16px; z-index: 60; padding: 10px 14px; border: 1px solid rgba(17, 20, 24, .12); background: rgba(255, 255, 255, .94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--ink); font: 400 10.5px/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; transition: background .4s var(--ease); }
 .motion-switch:hover { background: #fff; }
+
+/* ---------- Fixes (audit 2026-10-05) ---------- */
+/* 1. The tilted jacket on the 404 page must not widen the page on phones. */
+.nf { overflow: hidden; }
+/* 2. The footer curtain only works when the footer fits on the screen; on low screens it just scrolls. */
+@media (max-height: 560px) { .ftr { position: relative; } }
+/* 4. Season texts clear the menu bar on low screens. */
+.ss-info { top: max(15vh, calc(var(--header-h) + 40px)); }
+/* 5. The motion switch: small and out of the way; while motion is on it lives in the footer. */
+.motion-switch { left: auto; right: 16px; bottom: 16px; padding: 8px 12px; font-size: 10px; opacity: .9; transition: opacity .4s var(--ease), transform .5s var(--ease); }
+.motion-switch.is-away { opacity: 0; transform: translateY(8px); pointer-events: none; }
+.ftr .motion-switch { position: static; justify-self: start; grid-column: 1 / -1; margin-top: 4px; padding: 0; border: 0; background: none; color: var(--muted); -webkit-backdrop-filter: none; backdrop-filter: none; opacity: 1; transform: none; pointer-events: auto; }
+.ftr .motion-switch:hover { color: var(--ink); background: none; }
+body:has(.buybar.show) > .motion-switch { bottom: 92px; }   /* stays clear of the product page's buy bar */
