@@ -15,16 +15,16 @@ The two never share files: `minimal/` has its own pages, styles, scripts, fonts 
 
 The homepage is told in scenes that play as you scroll. All the animation code is our own, with no libraries:
 - `js/motion.js` is the engine: smooth scroll, scenes, text reveals and the hiding header.
-- `js/zip.js` runs the opening scene.
+- `js/rack.js` runs the opening scene (the rail).
 - `js/home.js` runs the other scenes.
 
-1. **Unzip:** the camera pushes in from the Lakeshore Shell to its zip. The screen then becomes the jacket's fabric, drawn live in WebGL: ripstop, zip tape, metal teeth and the patch. Scrolling, or dragging the pull, unzips it to reveal Collection 01.
+1. **The rail:** six jackets hang from a metal rail in front of the giant CHIACTIVE. After the loading screen they drop onto the rail one by one and swing to a stop. Scrolling pulls the rail sideways, and each jacket is a real pendulum: a damped spring that leans away from the direction of travel, kicked harder the faster you scroll, plus a tiny breeze. The jacket in the middle is in focus with its name and price, and a click opens its page. Everything is plain CSS transforms (no WebGL), driven by the scroll position.
 2. **Manifesto and marquee:** a sentence whose words light up as you scroll, and an outlined "Four kinds of cold" marquee that follows your scroll speed.
 3. **Four kinds of cold:** a sideways journey through January, February, April and an October night with rain, with each photo shown framed over a blurred copy of itself.
 4. **The star:** a zoom from the jacket into the patch and into the Chicago star, until it fills the screen.
 5. **Shot in Chicago:** three photo columns drifting at different speeds, then the footer reveals itself like a curtain.
 
-With "Reduce motion" turned on, the page shows everything without animation, and a small button lets the visitor turn motion on anyway.
+Motion is always on: the site plays the same for every visitor, whatever their system's "Reduce motion" setting says, and there is no switch.
 
 ## Files
 
@@ -35,7 +35,6 @@ With "Reduce motion" turned on, the page shows everything without animation, and
 | `blog/` | Journal: the student posts and the backpack article |
 | `styles.css` | All styles for the main site |
 | `js/main.js`, `js/products.js` | Cart, search, menu, product page, filters, checkout; product catalog |
-| `tools/video_to_frames.py` | Turns an AI unzip video into frames for the intro |
 | `publish.py` | Publishes the main site to GitHub Pages |
 | `minimal/` | The ultra-minimal version (separate site) |
 | `_archive/` | Earlier versions and explorations |

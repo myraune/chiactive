@@ -7,15 +7,10 @@
    - Reveals: [data-split] text is split into words (or letters with data-split="chars") that rise
      in when they enter the screen; [data-reveal] elements unmask or rise in.
    - Header: hides while you scroll down and comes back when you scroll up (homepage).
-   With "reduce motion" on: no smooth scroll, no scenes, everything is simply shown.
-   Add ?motion=1 to the address to force motion on. */
+   Motion is always on: the site is the scroll film, so it plays the same for every visitor. */
 (() => {
   const html = document.documentElement;
-  // "Reduce motion" is respected, but the visitor can still turn the motion on (remembered), or add ?motion=1.
-  const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let chosen = null;
-  try { chosen = localStorage.getItem('cx-motion'); } catch (e) { /* storage blocked */ }
-  const reduce = prefersReduced && chosen !== 'on' && !/[?&]motion=1/.test(location.search);
+  const reduce = false;                                    // motion is always on
   const touch = matchMedia('(hover: none)').matches;
   const smooth = !reduce && !touch;
   const CX = window.CX = { reduce, smooth, y: scrollY, velocity: 0, scene, scrollTo: to, measure: measureAll };
@@ -146,29 +141,6 @@
       if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
     }), { rootMargin: '0px 0px -12% 0px' });
     revealables.forEach(el => { if (!el.hasAttribute('data-manual')) io.observe(el); });
-  }
-
-  /* ---------- Motion switch: only shown to visitors whose system asks for reduced motion ---------- */
-  if (prefersReduced) {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'motion-switch';
-    b.textContent = reduce ? 'Motion is reduced · Turn on' : 'Motion on · Reduce';
-    b.addEventListener('click', () => {
-      try { localStorage.setItem('cx-motion', reduce ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
-      location.reload();
-    });
-    // With motion on, the switch sits quietly in the footer. With motion reduced it floats in the
-    // corner (it is the way to turn motion on), and steps aside while the page is scrolling.
-    const ftr = document.querySelector('.ftr');
-    if (!reduce && ftr) ftr.insertBefore(b, ftr.querySelector('.ftr-word'));   // above the big wordmark
-    else {
-      document.body.append(b);
-      let t = 0;
-      addEventListener('scroll', () => {
-        b.classList.add('is-away'); clearTimeout(t);
-        t = setTimeout(() => b.classList.remove('is-away'), 900);
-      }, { passive: true });
-    }
   }
 
   /* ---------- Magnetic buttons ---------- */
